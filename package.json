@@ -1,0 +1,47 @@
+{
+    "name": "hrv-system",
+    "version": "1.0.0",
+    "description": "hrv-system",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node --max_old_space_size=8192"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://git-codecommit.ap-northeast-1.amazonaws.com/v1/repos/fengshun-api"
+    },
+    "author": "Gini",
+    "license": "ISC",
+    "dependencies": {
+        "@abandonware/bluetooth-hci-socket": "^0.5.3-7",
+        "@abandonware/noble": "^1.9.2-14",
+        "@avihimsa/heart-rate-variability-analysis": "^0.1.2",
+        "ant-plus": "^0.1.24",
+        "audio-oscillator": "^3.1.1",
+        "binding": "^3.0.3",
+        "fft-js": "0.0.12",
+        "fourier-transform": "^1.1.2",
+        "jstat": "^1.9.5",
+        "koa": "^2.7.0",
+        "koa-bodyparser": "^4.2.1",
+        "koa-router": "^7.4.0",
+        "koa-static": "^5.0.0",
+        "koa2-cors": "^2.0.6",
+        "node-cron": "^3.0.0",
+        "open": "^8.2.0",
+        "os": "^0.1.1",
+        "pg": "^8.6.0",
+        "pg-hstore": "^2.3.3",
+        "sequelize": "^6.6.2",
+        "usb": "^1.7.1"
+    },
+    "bin": "app.js",
+    "pkg": {
+        "scripts": [],
+        "assets": [
+            "node_modules/usb/build/**",
+            "dist/**/*"
+        ]
+    }
+}

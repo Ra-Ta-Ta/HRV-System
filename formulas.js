@@ -1,0 +1,74 @@
+const { Time } = require('@avihimsa/heart-rate-variability-analysis')
+const formulas = {
+    AGE: (birthday) => (birthday !== null ? new Date().getFullYear() - new Date(birthday).getFullYear() : 40),
+    MEAN_HR: (hr_array) => Math.round((hr_array.reduce((a, b) => a + b) / hr_array.length) * 100) / 100,
+    MAX_HR: (hr_array) => hr_array.reduce((a, b) => Math.max(a, b)),
+    MIN_HR: (hr_array) => hr_array.reduce((a, b) => Math.min(a, b)),
+    SDNN: (all_rri) => {
+        const sdnn = Math.round(Time.SDNN(all_rri) * 10) / 10
+        return sdnn
+    },
+    RMSSD: (all_rri) => {
+        const rmssd = Math.round(Time.RMSSD(all_rri) * 10) / 10
+        return rmssd
+    },
+    HRR: (age, current_hr, current_max_hr) => {
+        // 最大心率估計方式採用Jackson et al. (2007)提出對年齡校正之預估公式HRmax= 206.9 - (0.67＊Age)。
+        let estimate_max_hr = 206.9 - 0.67 * age
+        // 如果實際數據高(低)於預估數據，則採用實際數據。
+        let max_hr = current_max_hr > estimate_max_hr ? current_max_hr : estimate_max_hr
+        // 根據美國心臟協會統計: 常人靜止心率約為 60，而專業運動員則可低至 40。
+        let rest_hr = current_hr < 40 ? current_hr : 40
+        // 最大心率與最小心率差值即為心率儲備(HRR, Heart Rate Reserve)。
+        let hrr = max_hr - rest_hr
+        // %HRR為HRR的量化指標，%HRR = (HRex – HRrest)/(HRmax – HRrest)。
+        let percent_hrr = Math.round(((current_hr - rest_hr) / hrr) * 100 * 10) / 10
+        return percent_hrr
+    },
+
+    FFT: (all_rri) => {
+        const { fft, util } = require('fft-js')
+        const rri_mean = Math.round((all_rri.reduce((a, b) => a + b) / all_rri.length) * 100) / 100
+        const all_frequency = all_rri.map((rri) => rri - rri_mean)
+        const all_frequency_length = all_frequency.length
+        const get_size = (power) => Math.pow(2, power)
+        let power = 1
+        while (get_size(power) < all_frequency_length) {
+            power++
+        }
+        const bufferSize = get_size(power)
+        const buffer = all_frequency.concat(new Array(bufferSize - all_frequency_length).fill(0))
+        const phasors = fft(buffer)
+        const sample_rate = 1000
+        const frequencies = util.fftFreq(phasors, sample_rate)
+        const magnitudes = util.fftMag(phasors)
+        const ms_to_s = (ms) => ms / 1000
+        const points = frequencies.map(function (f, ix) {
+            return { x: ms_to_s(f), y: magnitudes[ix] / (bufferSize / 2) }
+        })
+        let TF = []
+        let HF = []
+        let LF = []
+        let VLF = []
+
+        for (let point of points) {
+            TF.push(point.y)
+            if (point.x < 0.04) VLF.push(point.y)
+            else if (point.x >= 0.04 && point.x < 0.15) LF.push(point.y)
+            else if (point.x >= 0.15 && point.x <= 0.4) HF.push(point.y)
+        }
+
+        TF = TF.reduce((a, b) => a + b)
+        HF = HF.reduce((a, b) => a + b)
+        LF = LF.reduce((a, b) => a + b)
+        VLF = VLF.reduce((a, b) => a + b)
+
+        const nHF = (HF / (TF - VLF)) * 100
+        const nLF = (LF / (TF - VLF)) * 100
+        const ratio = Math.round((nLF / nHF) * 10) / 10
+
+        return ratio
+    },
+}
+
+module.exports = formulas
