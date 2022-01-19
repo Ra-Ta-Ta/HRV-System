@@ -8,7 +8,7 @@ const sequelize = new Sequelize(config.postgreServerUrl, {
     logging: false,
     retry: { match: [/ETIMEDOUT/], max: 5 },
 })
-const { Data, Current_data, Personnel, Wristband, Gateway } = require('./models')
+const { Test, Data, Current_data, Personnel, Wristband, Gateway } = require('./models')
 const {
     GET_DATA,
     GET_PERSONNELS_DATA,
@@ -36,9 +36,30 @@ module.exports = async () => {
             const parsed_data = await parse_band_data(band_data)
             if (parsed_data && parsed_data.hr > 0) {
                 await CREATE_DATA(Data, parsed_data)
-                await UPDATE_DATA(Current_data, parsed_data)
-                await UPDATE_GATEWAY(parsed_data)
-                await UPDATE_WRISTBAND(parsed_data)
+                const data_index = all_user_data.findIndex((user_data) => user_data.user_id === parsed_data.user_id)
+                const data_exists = data_index === -1 ? false : true
+                if (data_exists) {
+                    all_user_data[data_index]['all_data'].push(parsed_data)
+                } else {
+                    all_user_data.push({ user_id: parsed_data.user_id, all_data: [parsed_data] })
+                }
+            }
+        }
+    })
+
+    cron.schedule('*/5 * * * * *', async () => {
+        if (all_user_data.length > 0) {
+            for (let user_data of all_user_data) {
+                const hr = Math.round(
+                    user_data.all_data.reduce((sum, { hr }) => sum + hr, 0) / user_data.all_data.length
+                )
+                const timestamp = Date.now()
+                const upload_data = { ...user_data.all_data[0], hr: hr, timestamp: timestamp }
+                await CREATE_DATA(Test, upload_data)
+                // await UPDATE_DATA(Current_data, upload_data)
+                // await UPDATE_GATEWAY(upload_data)
+                // await UPDATE_WRISTBAND(upload_data)
+                all_user_data = []
             }
         }
     })

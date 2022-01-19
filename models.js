@@ -2,7 +2,10 @@ const config = require('./config')
 const Sequelize = require('sequelize')
 const sequelize = new Sequelize(config.postgreServerUrl, {
     logging: false,
-    pool: { max: 10, min: 0, acquire: 30000, idle: 10000 },
+    pool: { max: 10, min: 0, acquire: 60000, idle: 10000 },
+    dialectOptions: {
+        connectTimeout: 60000,
+    },
 })
 const pg = require('pg')
 
@@ -492,7 +495,7 @@ Wristband.init(
     }
 )
 
-// sequelize.sync()
+// sequelize.sync({ force: true })
 // sequelize.drop()
 // Data.sync({ force: true })
 // Current_data.sync({ force: true })
@@ -512,13 +515,13 @@ Wristband.init(
 Data.belongsTo(Personnel, { foreignKey: 'user_id', targetKey: 'user_id' })
 
 // Personnel.hasOne(Current_data, { foreignKey: 'user_id', sourceKey: 'user_id' })
-Current_data.belongsTo(Personnel, { foreignKey: 'user_id', targetKey: 'user_id' })
+// Current_data.belongsTo(Personnel, { foreignKey: 'user_id', targetKey: 'user_id' })
 
 // Gateway.hasOne(Current_data, { foreignKey: 'gateway', sourceKey: 'gateway', as: 'gateways' })
-Current_data.belongsTo(Gateway, { foreignKey: 'gateway', targetKey: 'gateway', as: 'gateways' })
+// Current_data.belongsTo(Gateway, { foreignKey: 'gateway', targetKey: 'gateway', as: 'gateways' })
 
 // Current_data.hasOne(Five_minute_hrv, { foreignKey: 'user_id', sourceKey: 'user_id', as: 'hrv' })
-Current_data.belongsTo(Five_minute_hrv, { foreignKey: 'user_id', targetKey: 'user_id' })
+// Current_data.belongsTo(Five_minute_hrv, { foreignKey: 'user_id', targetKey: 'user_id' })
 
 module.exports = {
     Data,

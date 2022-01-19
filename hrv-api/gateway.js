@@ -65,7 +65,7 @@ const api = {
 
     // 刪除單一定位器
     deleteGateway: async function (ctx) {
-        let gateway = ctx.params.gateway
+        const gateway = ctx.params.gateway
         try {
             await Gateway.destroy({
                 where: {

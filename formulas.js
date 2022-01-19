@@ -1,15 +1,15 @@
 const { Time } = require('@avihimsa/heart-rate-variability-analysis')
 const formulas = {
     AGE: (birthday) => (birthday !== null ? new Date().getFullYear() - new Date(birthday).getFullYear() : 40),
-    MEAN_HR: (hr_array) => Math.round((hr_array.reduce((a, b) => a + b) / hr_array.length) * 100) / 100,
-    MAX_HR: (hr_array) => hr_array.reduce((a, b) => Math.max(a, b)),
-    MIN_HR: (hr_array) => hr_array.reduce((a, b) => Math.min(a, b)),
+    MEAN_HR: (all_hr) => Math.round((all_hr.reduce((a, b) => a + b) / all_hr.length) * 100) / 100,
+    MAX_HR: (all_hr) => all_hr.reduce((a, b) => Math.max(a, b)),
+    MIN_HR: (all_hr) => all_hr.reduce((a, b) => Math.min(a, b)),
     SDNN: (all_rri) => {
-        const sdnn = Math.round(Time.SDNN(all_rri) * 10) / 10
+        const sdnn = Time.SDNN(all_rri)
         return sdnn
     },
     RMSSD: (all_rri) => {
-        const rmssd = Math.round(Time.RMSSD(all_rri) * 10) / 10
+        const rmssd = Time.RMSSD(all_rri)
         return rmssd
     },
     HRR: (age, current_hr, current_max_hr) => {
@@ -22,7 +22,7 @@ const formulas = {
         // 最大心率與最小心率差值即為心率儲備(HRR, Heart Rate Reserve)。
         let hrr = max_hr - rest_hr
         // %HRR為HRR的量化指標，%HRR = (HRex – HRrest)/(HRmax – HRrest)。
-        let percent_hrr = Math.round(((current_hr - rest_hr) / hrr) * 100 * 10) / 10
+        let percent_hrr = ((current_hr - rest_hr) / hrr) * 100
         return percent_hrr
     },
 
@@ -65,7 +65,7 @@ const formulas = {
 
         const nHF = (HF / (TF - VLF)) * 100
         const nLF = (LF / (TF - VLF)) * 100
-        const ratio = Math.round((nLF / nHF) * 10) / 10
+        const ratio = nLF / nHF
 
         return ratio
     },

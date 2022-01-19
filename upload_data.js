@@ -8,13 +8,11 @@ const {
     Data,
     Current_data,
     Personnel,
-    One_minute_hrv,
     Five_minute_hrv,
     One_hour_hrv,
     One_day_hrv,
     One_week_hrv,
     One_month_hrv,
-    One_minute_hr,
     Five_minute_hr,
     One_hour_hr,
     One_day_hr,
@@ -80,65 +78,82 @@ let upload_five_minute_data = async () => {
                 if (last_group && timestamp - user_data[i - 1]['timestamp'] <= maximum_interval) {
                     last_group.push(hr_data)
                 } else {
-                    const group = []
-                    group.push(hr_data)
-                    all_hr_group.push(group)
+                    all_hr_group.push([hr_data])
                 }
             })
 
             const all_one_minute_group = []
+            const interval = 60000
+            const start_timestamp = all_hr_group[0][0]['timestamp']
+            let end_timestamp = start_timestamp + interval
 
             for (let hr_group of all_hr_group) {
-                const res = new Map()
-                const all_hr_data = hr_group
-                    .reverse()
-                    .filter((hr_data) => !res.has(hr_data.timestamp) && res.set(hr_data.timestamp, 1))
-                    .reverse()
-                const interval = 60000
-                const start_timestamp = all_hr_data[0]['timestamp']
-                let end_timestamp = start_timestamp + interval
-
-                for (let hr_data of all_hr_data) {
+                for (let hr_data of hr_group) {
                     const { hr, timestamp } = hr_data
                     const last_group = all_one_minute_group[all_one_minute_group.length - 1]
 
                     if (last_group) {
                         if (timestamp > end_timestamp) {
                             end_timestamp = timestamp + interval
-                            const group = []
-                            group.push(hr)
-                            all_one_minute_group.push(group)
+                            all_one_minute_group.push([hr_data])
                         } else {
-                            last_group.push(hr)
+                            last_group.push(hr_data)
                         }
                     } else {
-                        const group = []
-                        group.push(hr)
-                        all_one_minute_group.push(group)
+                        all_one_minute_group.push([hr_data])
                     }
                 }
             }
 
-            const all_hr = []
+            let all_hr = []
+            const all_hrr = []
             const all_rmssd = []
             const all_sdnn = []
             const all_ratio = []
 
             for (let one_minute_group of all_one_minute_group) {
-                Object.assign(all_hr, one_minute_group)
-                const all_rri = all_hr.map((hr) => 60000 / hr)
+                const all_five_minute_group = []
+                const interval = 5000
+                const start_timestamp = one_minute_group[0]['timestamp']
+                let end_timestamp = start_timestamp + interval
+
+                for (let hr_data of one_minute_group) {
+                    const { hr, timestamp } = hr_data
+                    const last_group = all_five_minute_group[all_five_minute_group.length - 1]
+
+                    if (last_group) {
+                        if (timestamp > end_timestamp) {
+                            end_timestamp = timestamp + interval
+                            all_five_minute_group.push([hr])
+                        } else {
+                            last_group.push(hr)
+                        }
+                    } else {
+                        all_five_minute_group.push([hr])
+                    }
+                }
+
+                one_minute_group = all_five_minute_group.map((five_minute_group) =>
+                    Math.round(five_minute_group.reduce((a, b) => a + b) / five_minute_group.length)
+                )
+
+                all_hr = all_hr.concat(one_minute_group)
+                const all_rri = one_minute_group.map((hr) => 60000 / hr)
+                const hrr = HRR(AGE(user_data[0].birthday), MEAN_HR(one_minute_group), MAX_HR(one_minute_group))
                 const rmssd = RMSSD(all_rri)
                 const sdnn = SDNN(all_rri)
                 const ratio = FFT(all_rri)
 
+                if (hrr > 0) all_hrr.push(hrr)
                 if (rmssd > 0) all_rmssd.push(rmssd)
                 if (sdnn > 0) all_sdnn.push(sdnn)
                 if (ratio > 0) all_ratio.push(ratio)
             }
 
-            const mean_rmssd = all_rmssd.reduce((a, b) => a + b) / all_rmssd.length
-            const mean_sdnn = all_sdnn.reduce((a, b) => a + b) / all_sdnn.length
-            const mean_ratio = all_ratio.reduce((a, b) => a + b) / all_ratio.length
+            const mean_hrr = Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 10) / 10
+            const mean_rmssd = Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 10) / 10
+            const mean_sdnn = Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 10) / 10
+            const mean_ratio = Math.round((all_ratio.reduce((a, b) => a + b) / all_ratio.length) * 10) / 10
             const hr_data = {
                 user_id: valid_user_id,
                 timestamp: Date.now(),
@@ -149,7 +164,7 @@ let upload_five_minute_data = async () => {
             const hrv_data = {
                 user_id: valid_user_id,
                 timestamp: Date.now(),
-                hrr: HRR(AGE(user_data[0].birthday), MEAN_HR(all_hr), MAX_HR(all_hr)),
+                hrr: mean_hrr,
                 rmssd: mean_rmssd,
                 sdnn: mean_sdnn,
                 ratio: mean_ratio,
@@ -162,75 +177,6 @@ let upload_five_minute_data = async () => {
         console.log(err)
     }
 }
-
-// // 每分鐘從原始數據中，提取並換算 Hr、Hrv 相關數據
-// let upload_per_minute_data = async () => {
-//     let last_min = {
-//         start_time: new Date().setMinutes(new Date().getMinutes() - 1, 0, 0),
-//         end_time: new Date().setSeconds(0, 0),
-//     }
-//     try {
-//         let all_data = await Data.findAll({
-//             include: {
-//                 model: Personnel,
-//                 required: true,
-//                 where: {
-//                     user_id: { [Op.col]: 'data.user_id' },
-//                 },
-//             },
-//             where: {
-//                 hr: { [Op.gt]: 0 },
-//                 timestamp: { [Op.between]: [last_min.start_time, last_min.end_time] },
-//             },
-
-//             nest: true,
-//         })
-//         if (all_data.length > 0) {
-//             let all_user_id = []
-//             all_data = all_data.map((data) => {
-//                 data.birthday = parseInt(data.personnel.birthday)
-//                 delete data.personnel
-//                 all_user_id.push(data.user_id)
-//                 return data
-//             })
-
-//             all_user_id = [...new Set(all_user_id)]
-//             all_user_id.forEach(async (user_id) => {
-//                 let user_data = all_data.filter((data) => data.user_id === user_id)
-//                 // 避免抓取到在當前區間裡無數據的使用者，並限定資料數至少兩筆以上。
-//                 if (user_data.length > 1) {
-//                     let all_hr = []
-//                     let all_rri = []
-
-//                     user_data.forEach((data) => {
-//                         all_hr.push(data.hr)
-//                         all_rri.push(60000 / data.hr)
-//                     })
-
-//                     let hr_data = {
-//                         user_id: user_id,
-//                         timestamp: Date.now(),
-//                         max_hr: MAX_HR(all_hr),
-//                         mean_hr: MEAN_HR(all_hr),
-//                         min_hr: MIN_HR(all_hr),
-//                     }
-
-//                     let hrv_data = {
-//                         user_id: user_id,
-//                         timestamp: Date.now(),
-//                         hrr: HRR(AGE(user_data[0].birthday), MEAN_HR(all_hr), MAX_HR(all_hr)),
-//                         rmssd: RMSSD(all_rri),
-//                         sdnn: SDNN(all_rri),
-//                     }
-//                     await CREATE_DATA(One_minute_hr, hr_data)
-//                     await CREATE_DATA(One_minute_hrv, hrv_data)
-//                 }
-//             })
-//         }
-//     } catch (err) {
-//         console.log(err)
-//     }
-// }
 
 // 從限定區間中，取得先前已換算的資料總和的平均做為新區間的值，避免操作原始資料而加重資料庫負擔。
 let upload_data = async (

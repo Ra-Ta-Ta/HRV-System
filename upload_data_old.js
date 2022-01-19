@@ -5,16 +5,15 @@ const cron = require('node-cron')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const {
+    Test,
     Data,
     Current_data,
     Personnel,
-    One_minute_hrv,
     Five_minute_hrv,
     One_hour_hrv,
     One_day_hrv,
     One_week_hrv,
     One_month_hrv,
-    One_minute_hr,
     Five_minute_hr,
     One_hour_hr,
     One_day_hr,
@@ -37,12 +36,12 @@ let upload_five_minute_data = async () => {
 
     try {
         const all_data = (
-            await Data.findAll({
+            await Test.findAll({
                 include: {
                     model: Personnel,
                     required: true,
                     where: {
-                        user_id: { [Op.col]: 'data.user_id' },
+                        user_id: { [Op.col]: 'test.user_id' },
                     },
                 },
                 where: {
@@ -80,78 +79,69 @@ let upload_five_minute_data = async () => {
                 if (last_group && timestamp - user_data[i - 1]['timestamp'] <= maximum_interval) {
                     last_group.push(hr_data)
                 } else {
-                    all_hr_group.push([hr_data])
+                    const group = []
+                    group.push(hr_data)
+                    all_hr_group.push(group)
                 }
             })
 
             const all_one_minute_group = []
-            const interval = 60000
-            const start_timestamp = all_hr_group[0]['timestamp']
-            let end_timestamp = start_timestamp + interval
 
             for (let hr_group of all_hr_group) {
-                for (let hr_data of hr_group) {
+                const res = new Map()
+                const all_hr_data = hr_group
+                    .reverse()
+                    .filter((hr_data) => !res.has(hr_data.timestamp) && res.set(hr_data.timestamp, 1))
+                    .reverse()
+                const interval = 60000
+                const start_timestamp = all_hr_data[0]['timestamp']
+                let end_timestamp = start_timestamp + interval
+
+                for (let hr_data of all_hr_data) {
                     const { hr, timestamp } = hr_data
                     const last_group = all_one_minute_group[all_one_minute_group.length - 1]
 
                     if (last_group) {
                         if (timestamp > end_timestamp) {
                             end_timestamp = timestamp + interval
-                            all_one_minute_group.push([hr_data])
+                            const group = []
+                            group.push(hr)
+                            all_one_minute_group.push(group)
                         } else {
-                            last_group.push(hr_data)
+                            last_group.push(hr)
                         }
                     } else {
-                        all_one_minute_group.push([hr_data])
+                        const group = []
+                        group.push(hr)
+                        all_one_minute_group.push(group)
                     }
                 }
             }
 
-            const all_hr = []
+            let all_hr = []
+            const all_hrr = []
             const all_rmssd = []
             const all_sdnn = []
             const all_ratio = []
 
             for (let one_minute_group of all_one_minute_group) {
-                const all_five_minute_group = []
-                const interval = 5000
-                const start_timestamp = one_minute_group[0]['timestamp']
-                let end_timestamp = start_timestamp + interval
-
-                for (let hr_data of one_minute_group) {
-                    const { hr, timestamp } = hr_data
-                    const last_group = all_five_minute_group[all_five_minute_group.length - 1]
-
-                    if (last_group) {
-                        if (timestamp > end_timestamp) {
-                            end_timestamp = timestamp + interval
-                            all_five_minute_group.push([hr])
-                        } else {
-                            last_group.push(hr)
-                        }
-                    } else {
-                        all_five_minute_group.push([hr])
-                    }
-                }
-
-                one_minute_group = all_five_minute_group.map((five_minute_group) =>
-                    Math.round(five_minute_group.reduce((a, b) => a + b) / five_minute_group.length)
-                )
-
-                Object.assign(all_hr, one_minute_group)
-                const all_rri = all_hr.map((hr) => 60000 / hr)
+                all_hr = all_hr.concat(one_minute_group)
+                const all_rri = one_minute_group.map((hr) => 60000 / hr)
+                const hrr = HRR(AGE(user_data[0].birthday), MEAN_HR(one_minute_group), MAX_HR(one_minute_group))
                 const rmssd = RMSSD(all_rri)
                 const sdnn = SDNN(all_rri)
                 const ratio = FFT(all_rri)
 
+                if (hrr > 0) all_hrr.push(hrr)
                 if (rmssd > 0) all_rmssd.push(rmssd)
                 if (sdnn > 0) all_sdnn.push(sdnn)
                 if (ratio > 0) all_ratio.push(ratio)
             }
 
-            const mean_rmssd = all_rmssd.reduce((a, b) => a + b) / all_rmssd.length
-            const mean_sdnn = all_sdnn.reduce((a, b) => a + b) / all_sdnn.length
-            const mean_ratio = all_ratio.reduce((a, b) => a + b) / all_ratio.length
+            const mean_hrr = Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 10) / 10
+            const mean_rmssd = Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 10) / 10
+            const mean_sdnn = Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 10) / 10
+            const mean_ratio = Math.round((all_ratio.reduce((a, b) => a + b) / all_ratio.length) * 10) / 10
             const hr_data = {
                 user_id: valid_user_id,
                 timestamp: Date.now(),
@@ -162,14 +152,15 @@ let upload_five_minute_data = async () => {
             const hrv_data = {
                 user_id: valid_user_id,
                 timestamp: Date.now(),
-                hrr: HRR(AGE(user_data[0].birthday), MEAN_HR(all_hr), MAX_HR(all_hr)),
+                hrr: mean_hrr,
                 rmssd: mean_rmssd,
                 sdnn: mean_sdnn,
                 ratio: mean_ratio,
             }
 
-            await CREATE_DATA(Five_minute_hr, hr_data)
-            await CREATE_DATA(Five_minute_hrv, hrv_data)
+            console.log('old hrv:', hrv_data)
+            // await CREATE_DATA(Five_minute_hr, hr_data)
+            // await CREATE_DATA(Five_minute_hrv, hrv_data)
         }
     } catch (err) {
         console.log(err)
@@ -293,7 +284,7 @@ let upload_data = async (
                     min_hr: min_hr,
                 }
 
-                await CREATE_DATA(upload_hr_table, hr_data)
+                // await CREATE_DATA(upload_hr_table, hr_data)
                 all_user_id_index++
             } while (all_user_id_index < all_user_id_length)
         }
@@ -335,7 +326,7 @@ let upload_data = async (
                     rmssd: rmssd,
                     sdnn: sdnn,
                 }
-                await CREATE_DATA(upload_hrv_table, hrv_data)
+                // await CREATE_DATA(upload_hrv_table, hrv_data)
 
                 all_user_id_index++
             } while (all_user_id_index < all_user_id_length)
