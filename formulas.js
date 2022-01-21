@@ -25,7 +25,6 @@ const formulas = {
         let percent_hrr = ((current_hr - rest_hr) / hrr) * 100
         return percent_hrr
     },
-
     FFT: (all_rri) => {
         const { fft, util } = require('fft-js')
         const rri_mean = Math.round((all_rri.reduce((a, b) => a + b) / all_rri.length) * 100) / 100
@@ -68,6 +67,14 @@ const formulas = {
         const ratio = nLF / nHF
 
         return ratio
+    },
+    OUTLIER: (mean, sd, sd_scale) => {
+        const Q1 = mean - sd * 0.675
+        const Q3 = mean + sd * 0.675
+        const IQR = Q3 - Q1
+        const scale = (sd_scale - 0.675) / 1.35
+        const outlier = Math.round((Q1 - scale * IQR) * 10) / 10
+        return outlier
     },
 }
 
