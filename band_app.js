@@ -22,7 +22,6 @@ const {
 } = require('./methods')
 // 自動排程執行套件
 const cron = require('node-cron')
-let all_user_data = []
 
 module.exports = async () => {
     await noble.on('stateChange', (state) => {
@@ -94,25 +93,7 @@ module.exports = async () => {
 
         let personnelData = await Personnel.findOne({ where: { mac: mac } })
 
-        if (pair_type == 'Polar H10 76F8D22F') {
-            let polar_hr = parseInt(raw_data.substring(10, 12), 16)
-            let result = {
-                user_id: personnelData.dataValues.user_id,
-                mac: mac, // cc:57:d2:a4:f1:39
-                pair_type: 'H10',
-                hr: polar_hr,
-                battery: 100,
-                rssi: -70,
-                gateway: config.gateway,
-                step: 0,
-                rri: polar_hr > 0 ? Math.round(60000 / polar_hr) : 0,
-                charge: false,
-                sos: sos,
-                timestamp: timestamp,
-                temperature: temperature,
-            }
-            return result
-        } else if (personnelData !== null) {
+        if (personnelData) {
             let user_id = personnelData.dataValues.user_id
             let result = {
                 user_id: user_id,

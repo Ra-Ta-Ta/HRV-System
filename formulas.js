@@ -1,7 +1,7 @@
 const { Time } = require('@avihimsa/heart-rate-variability-analysis')
 const formulas = {
     AGE: (birthday) => (birthday !== null ? new Date().getFullYear() - new Date(birthday).getFullYear() : 40),
-    MEAN_HR: (all_hr) => Math.round((all_hr.reduce((a, b) => a + b) / all_hr.length) * 100) / 100,
+    MEAN_HR: (all_hr) => Math.round((all_hr.reduce((a, b) => a + b) / all_hr.length) * 10) / 10,
     MAX_HR: (all_hr) => all_hr.reduce((a, b) => Math.max(a, b)),
     MIN_HR: (all_hr) => all_hr.reduce((a, b) => Math.min(a, b)),
     SDNN: (all_rri) => {
@@ -27,7 +27,7 @@ const formulas = {
     },
     FFT: (all_rri) => {
         const { fft, util } = require('fft-js')
-        const rri_mean = Math.round((all_rri.reduce((a, b) => a + b) / all_rri.length) * 100) / 100
+        const rri_mean = all_rri.reduce((a, b) => a + b) / all_rri.length
         const all_frequency = all_rri.map((rri) => rri - rri_mean)
         const all_frequency_length = all_frequency.length
         const get_size = (power) => Math.pow(2, power)
