@@ -46,7 +46,7 @@ const api = {
                 `,
                 { raw: true, type: QueryTypes.SELECT }
             )
-            ctx.response.body = data.length > 0 ? data : null
+            ctx.response.body = data
         } catch (error) {
             console.log(error)
             ctx.response.body = error.errors

@@ -57,16 +57,18 @@ const formulas = {
             else if (point.x >= 0.15 && point.x <= 0.4) HF.push(point.y)
         }
 
-        TF = TF.reduce((a, b) => a + b)
-        HF = HF.reduce((a, b) => a + b)
-        LF = LF.reduce((a, b) => a + b)
-        VLF = VLF.reduce((a, b) => a + b)
+        if (HF.length > 1 && LF.length > 1) {
+            TF = TF.reduce((a, b) => a + b)
+            HF = HF.reduce((a, b) => a + b)
+            LF = LF.reduce((a, b) => a + b)
+            VLF = VLF.reduce((a, b) => a + b)
 
-        const nHF = (HF / (TF - VLF)) * 100
-        const nLF = (LF / (TF - VLF)) * 100
-        const ratio = nLF / nHF
+            const nHF = (HF / (TF - VLF)) * 100
+            const nLF = (LF / (TF - VLF)) * 100
+            const ratio = nLF / nHF
 
-        return ratio
+            return ratio
+        }
     },
     OUTLIER: (mean, sd, sd_scale) => {
         const Q1 = mean - sd * 0.675
