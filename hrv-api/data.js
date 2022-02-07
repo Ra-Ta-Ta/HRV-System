@@ -1,7 +1,14 @@
 const config = require('../config')
 const Sequelize = require('sequelize')
-const Op = Sequelize.Op
-const { Data } = require('../models')
+const { QueryTypes, Op } = Sequelize
+const kuotung_sequelize = new Sequelize(config.kuotungPostgreServerUrl, {
+    logging: false,
+    retry: { match: [/ETIMEDOUT/], max: 5 },
+    dialectOptions: {
+        connectTimeout: 60000,
+    },
+})
+const { Data, Personnel } = require('../models')
 
 const api = {
     // 取得單一使用者區間資料
@@ -13,24 +20,27 @@ const api = {
                 where: {
                     user_id: user_id,
                     timestamp: { [Op.between]: [start_time, end_time] },
+                    hr: { [Op.gt]: 0 },
                 },
+                order: [['timestamp', 'ASC']],
                 raw: true,
             })
-            let result = []
-            if (all_data.length > 0) {
-                all_data.forEach((data) => {
-                    let { timestamp, hr } = data
-                    if (hr > 0) {
-                        result.push({
-                            timestamp: timestamp,
-                            hr: hr,
-                        })
-                    }
-                })
-                result.sort((a, b) => parseInt(a.timestamp) - parseInt(b.timestamp))
-            }
 
-            ctx.response.body = result.length > 0 ? result : null
+            if (all_data.length > 0) {
+                ctx.response.body = all_data
+            } else {
+                all_data = await kuotung_sequelize.query(
+                    `
+                        SELECT d.hr, d.time as timestamp
+                        FROM datacurrents_history d
+                        WHERE d.pid = '${user_id}' AND d.hr > 0 AND d.time BETWEEN ${start_time} AND ${end_time}
+                        ORDER BY d.time ASC;
+                    `,
+                    { raw: true, type: QueryTypes.SELECT }
+                )
+
+                ctx.response.body = all_data
+            }
         } catch (error) {
             ctx.response.body = error.errors
         }

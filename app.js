@@ -2,10 +2,11 @@
 const { sequelize } = require('./models')
 sequelize.sync()
 // 引用 band_app 上傳手環相關資料
-// const Band = require('./band_app')()
+const Band = require('./band_app')()
 
 // 引用 hrv、hr table 上傳程式
 const Upload_data = require('./upload_data')()
+const Upload_data_kuotung = require('./upload_data_kuotung')()
 
 // 引用 open 自動開啟網頁套件
 const open = require('open')
