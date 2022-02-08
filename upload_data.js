@@ -224,7 +224,7 @@ let upload_data = async (
 
                 let total = user_hr_data.length
                 let max_hr = Math.round(all_max_hr / total)
-                let mean_hr = Math.round((all_mean_hr / total) * 100) / 100
+                let mean_hr = Math.round((all_mean_hr / total) * 10) / 10
                 let min_hr = Math.round(all_min_hr / total)
                 let hr_data = {
                     user_id: user_id,
