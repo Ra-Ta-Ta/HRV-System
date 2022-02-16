@@ -495,7 +495,7 @@ Wristband.init(
     }
 )
 
-// sequelize.sync({ force: true })
+sequelize.sync()
 // sequelize.drop()
 // Data.sync({ force: true })
 // Current_data.sync({ force: true })
@@ -512,7 +512,7 @@ Wristband.init(
 // One_month_hrv.sync({ force: true })
 
 // Personnel.hasOne(Data, { foreignKey: 'user_id', sourceKey: 'user_id' })
-Data.belongsTo(Personnel, { foreignKey: 'user_id', targetKey: 'user_id' })
+// Data.belongsTo(Personnel, { foreignKey: 'user_id', targetKey: 'user_id' })
 
 // Personnel.hasOne(Current_data, { foreignKey: 'user_id', sourceKey: 'user_id' })
 // Current_data.belongsTo(Personnel, { foreignKey: 'user_id', targetKey: 'user_id' })

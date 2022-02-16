@@ -15,7 +15,7 @@ const kuotung_sequelize = new Sequelize(config.kuotungPostgreServerUrl, {
         connectTimeout: 60000,
     },
 })
-const { Current_data, Personnel, Gateway, Five_minute_hrv } = require('../models')
+const { Data, Current_data, Personnel, Gateway, Five_minute_hrv } = require('../models')
 
 const api = {
     // 取得單一使用者即時資料
@@ -101,29 +101,38 @@ const api = {
                     })
                 ).filter((data) => kuotung_user_id.includes(data.user_id))
 
-                kuotung_data.forEach((data) => {
-                    let [hrv] = kuotung_hrv.filter((kuotung_data) => kuotung_data.user_id === data.user_id)
-                    if (hrv) {
-                        const { hrr, rmssd, sdnn, ratio } = hrv
-                        Object.assign(data, { hrr: hrr, rmssd: rmssd, sdnn: sdnn, ratio: ratio })
-                    } else {
-                        Object.assign(data, { hrr: null, rmssd: null, sdnn: null, ratio: null })
+                for (let data of kuotung_data) {
+                    if (data.hr > 0) {
+                        try {
+                            await Data.create({
+                                user_id: data.user_id,
+                                timestamp: data.timestamp,
+                                battery: data.battery,
+                                gateway: data.gateway,
+                                hr: data.hr,
+                                mac: data.mac,
+                                pair_type: data.pair_type,
+                                rssi: data.rssi,
+                                step: 0,
+                                rri: Math.round(60000 / data.hr),
+                                charge: false,
+                                sos: false,
+                                temperature: data.temperature,
+                            })
+                        } catch (err) {}
+
+                        let [hrv] = kuotung_hrv.filter((kuotung_data) => kuotung_data.user_id === data.user_id)
+                        if (hrv) {
+                            const { hrr, rmssd, sdnn, ratio } = hrv
+                            Object.assign(data, { hrr: hrr, rmssd: rmssd, sdnn: sdnn, ratio: ratio })
+                        } else {
+                            Object.assign(data, { hrr: null, rmssd: null, sdnn: null, ratio: null })
+                        }
                     }
-                })
+                }
+
                 data = data.concat(kuotung_data)
             }
-            await kuotung_sequelize.query(
-                `
-                SELECT c.pid as user_id, c.time as timestamp, c.mac::character varying, c.name, c.gateway, c.rssi, c.bat as battery, c.hr, b.model as pair_type, c.temperature, p.birthdate as birthday, l.name as location
-                FROM datacurrents c
-                INNER JOIN persons p ON p.pid = c.pid
-                INNER JOIN bands b ON b.mac = c.mac
-                LEFT JOIN gateways g ON g.name = c.gateway
-                LEFT JOIN locations l ON l.id = g.locationid;
-            `,
-                { raw: true, type: QueryTypes.SELECT }
-            )
-
             /* 測試區 */
             ctx.response.body = data
         } catch (error) {

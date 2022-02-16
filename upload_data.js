@@ -1,9 +1,14 @@
-// 自動排程執行套件
 const cron = require('node-cron')
-
-// 引入資料表操作模組
+const config = require('./config')
 const Sequelize = require('sequelize')
-const Op = Sequelize.Op
+const { Op, QueryTypes } = Sequelize
+const sequelize = new Sequelize(config.postgreServerUrl, {
+    logging: false,
+    retry: { match: [/ETIMEDOUT/], max: 5 },
+    dialectOptions: {
+        connectTimeout: 60000,
+    },
+})
 const {
     Data,
     Current_data,
@@ -35,31 +40,20 @@ let upload_five_minute_data = async () => {
 
     try {
         const all_data = (
-            await Data.findAll({
-                include: {
-                    model: Personnel,
-                    required: true,
-                    where: {
-                        user_id: { [Op.col]: 'data.user_id' },
-                    },
-                },
-                where: {
-                    timestamp: { [Op.between]: [last_five_min.start_time, last_five_min.end_time] },
-                },
-                order: Sequelize.col('timestamp'),
-                raw: true,
-                nest: true,
-            })
-        )
-            .map((data) => {
-                data.birthday = parseInt(data.personnel.birthday)
-                delete data.personnel
-                return data
-            })
-            .map((data) => ({
-                ...data,
-                timestamp: parseInt(data.timestamp, 10),
-            }))
+            await sequelize.query(
+                `
+                SELECT *, p.birthday
+                FROM data d
+                INNER JOIN personnel p ON p.user_id = d.user_id
+                WHERE d.hr > 0 AND d.timestamp BETWEEN ${last_five_min.start_time} AND ${last_five_min.end_time};
+            `,
+                { raw: true, type: QueryTypes.SELECT }
+            )
+        ).map((data) => ({
+            ...data,
+            birthday: parseInt(data.birthday, 10),
+            timestamp: parseInt(data.timestamp, 10),
+        }))
 
         if (all_data.length > 1) {
             const minimum_volume = 1

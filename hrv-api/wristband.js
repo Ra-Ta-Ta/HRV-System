@@ -82,6 +82,7 @@ const api = {
                     raw: true,
                 }
             )
+
             ctx.response.body = '手環已成功更新'
         } catch (error) {
             ctx.response.body = error.errors
