@@ -90,6 +90,17 @@ const api = {
         try {
             await Personnel.update(
                 {
+                    mac: null,
+                },
+                {
+                    where: {
+                        mac: data.mac,
+                    },
+                    raw: true,
+                }
+            )
+            await Personnel.update(
+                {
                     mac: data.mac,
                 },
                 {

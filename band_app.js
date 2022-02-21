@@ -91,10 +91,10 @@ module.exports = async () => {
 
         // 取得已註冊 user_id
 
-        let personnelData = await Personnel.findOne({ where: { mac: mac } })
+        let personnelData = await Personnel.findOne({ where: { mac: mac }, raw: true })
 
         if (personnelData) {
-            let user_id = personnelData.dataValues.user_id
+            let user_id = personnelData.user_id
             let result = {
                 user_id: user_id,
                 mac: mac,
@@ -122,27 +122,31 @@ module.exports = async () => {
     //             sensor.scan()
     //         })
     //         // 如果偵測到裝置回傳資料，而且同時帶有 SerialNumber 和心率值則上傳。
-    //         sensor.on('hbData', (data) => {
-    //             if (data.SerialNumber !== undefined && data.ComputedHeartRate > 0) {
-    //                 let result = {
-    //                     user_id: 'A111222333',
-    //                     mac: data.SerialNumber.toString(),
-    //                     pair_type: 'Garmin',
-    //                     hr: data.ComputedHeartRate,
-    //                     battery: null,
-    //                     rssi: null,
-    //                     gateway: config.gateway,
-    //                     step: null,
-    //                     rri: Math.round(60000 / data.ComputedHeartRate),
-    //                     charge: null,
-    //                     sos: null,
-    //                     timestamp: Date.now(),
-    //                     temperature: null,
+    //         sensor.on('hbData', async (data) => {
+    //             if (data.SerialNumber && data.ComputedHeartRate > 0) {
+    //                 let mac = data.SerialNumber.toString()
+    //                 let personnelData = await Personnel.findOne({ where: { mac: mac }, raw: true })
+    //                 if (personnelData) {
+    //                     let result = {
+    //                         user_id: personnelData.user_id,
+    //                         mac: mac,
+    //                         pair_type: 'Garmin',
+    //                         hr: data.ComputedHeartRate,
+    //                         battery: null,
+    //                         rssi: null,
+    //                         gateway: config.gateway,
+    //                         step: null,
+    //                         rri: Math.round(60000 / data.ComputedHeartRate),
+    //                         charge: null,
+    //                         sos: null,
+    //                         timestamp: Date.now(),
+    //                         temperature: null,
+    //                     }
+    //                     CREATE_DATA(Data, result)
+    //                     UPDATE_DATA(Current_data, result)
+    //                     UPDATE_GATEWAY(result)
+    //                     UPDATE_WRISTBAND(result)
     //                 }
-    //                 CREATE_DATA(Data, result)
-    //                 UPDATE_DATA(Current_data, result)
-    //                 UPDATE_GATEWAY(result)
-    //                 UPDATE_WRISTBAND(result)
     //             }
     //         })
     //     } catch (err) {
