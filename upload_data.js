@@ -149,30 +149,48 @@ let upload_five_minute_data = async () => {
                     }
                 }
 
-                if (all_hrr.length > 1 && all_rmssd.length > 1 && all_sdnn.length > 1 && all_ratio.length > 1) {
-                    const mean_hrr = Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 10) / 10
-                    const mean_rmssd = Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 10) / 10
-                    const mean_sdnn = Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 10) / 10
-                    const mean_ratio = Math.round((all_ratio.reduce((a, b) => a + b) / all_ratio.length) * 10) / 10
-                    const hr_data = {
-                        user_id: valid_user_id,
-                        timestamp: Date.now(),
-                        max_hr: MAX_HR(all_hr),
-                        mean_hr: MEAN_HR(all_hr),
-                        min_hr: MIN_HR(all_hr),
-                    }
-                    const hrv_data = {
-                        user_id: valid_user_id,
-                        timestamp: Date.now(),
-                        hrr: mean_hrr,
-                        rmssd: mean_rmssd,
-                        sdnn: mean_sdnn,
-                        ratio: mean_ratio,
-                    }
-
-                    await CREATE_DATA(Five_minute_hr, hr_data)
-                    await CREATE_DATA(Five_minute_hrv, hrv_data)
+                const mean_hrr =
+                    all_hrr.length > 1
+                        ? Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 10) / 10
+                        : all_hrr[0]
+                        ? all_hrr[0]
+                        : 0
+                const mean_rmssd =
+                    all_rmssd.length > 1
+                        ? Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 10) / 10
+                        : all_rmssd[0]
+                        ? all_rmssd[0]
+                        : 0
+                const mean_sdnn =
+                    all_sdnn.length > 1
+                        ? Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 10) / 10
+                        : all_sdnn[0]
+                        ? all_sdnn[0]
+                        : 0
+                const mean_ratio =
+                    all_ratio.length > 1
+                        ? Math.round((all_ratio.reduce((a, b) => a + b) / all_ratio.length) * 10) / 10
+                        : all_ratio[0]
+                        ? all_ratio[0]
+                        : 0
+                const hr_data = {
+                    user_id: valid_user_id,
+                    timestamp: Date.now(),
+                    max_hr: MAX_HR(all_hr),
+                    mean_hr: MEAN_HR(all_hr),
+                    min_hr: MIN_HR(all_hr),
                 }
+                const hrv_data = {
+                    user_id: valid_user_id,
+                    timestamp: Date.now(),
+                    hrr: mean_hrr,
+                    rmssd: mean_rmssd,
+                    sdnn: mean_sdnn,
+                    ratio: mean_ratio,
+                }
+
+                await CREATE_DATA(Five_minute_hr, hr_data)
+                await CREATE_DATA(Five_minute_hrv, hrv_data)
             }
         }
     } catch (err) {
