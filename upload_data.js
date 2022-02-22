@@ -153,25 +153,25 @@ let upload_five_minute_data = async () => {
                     all_hrr.length > 1
                         ? Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 10) / 10
                         : all_hrr[0]
-                        ? all_hrr[0]
+                        ? Math.round(all_hrr[0] * 10) / 10
                         : 0
                 const mean_rmssd =
                     all_rmssd.length > 1
                         ? Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 10) / 10
                         : all_rmssd[0]
-                        ? all_rmssd[0]
+                        ? Math.round(all_rmssd[0] * 10) / 10
                         : 0
                 const mean_sdnn =
                     all_sdnn.length > 1
                         ? Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 10) / 10
                         : all_sdnn[0]
-                        ? all_sdnn[0]
+                        ? Math.round(all_sdnn[0] * 10) / 10
                         : 0
                 const mean_ratio =
                     all_ratio.length > 1
                         ? Math.round((all_ratio.reduce((a, b) => a + b) / all_ratio.length) * 10) / 10
                         : all_ratio[0]
-                        ? all_ratio[0]
+                        ? Math.round(all_ratio[0] * 10) / 10
                         : 0
                 const hr_data = {
                     user_id: valid_user_id,
