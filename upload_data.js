@@ -105,7 +105,7 @@ let upload_five_minute_data = async () => {
                 const all_hrr = []
                 const all_rmssd = []
                 const all_sdnn = []
-                const all_ratio = []
+                const all_frequency = []
 
                 for (let one_minute_group of all_one_minute_group) {
                     const all_five_minute_group = []
@@ -133,64 +133,69 @@ let upload_five_minute_data = async () => {
                         Math.round(five_minute_group.reduce((a, b) => a + b) / five_minute_group.length)
                     )
 
-                    all_hr = all_hr.concat(one_minute_group)
+                    const wristband_malfunction = [...new Set(one_minute_group)].length === 1
 
-                    if (one_minute_group.length > 1) {
+                    if (wristband_malfunction) {
+                        break
+                    } else {
+                        all_hr = all_hr.concat(one_minute_group)
                         const all_rri = one_minute_group.map((hr) => 60000 / hr)
                         const hrr = HRR(AGE(user_data[0].birthday), MEAN_HR(one_minute_group), MAX_HR(one_minute_group))
                         const rmssd = RMSSD(all_rri)
                         const sdnn = SDNN(all_rri)
-                        const ratio = FFT(all_rri)
+                        const frequency = FFT(all_rri)
 
                         if (hrr > 0) all_hrr.push(hrr)
                         if (rmssd > 0) all_rmssd.push(rmssd)
                         if (sdnn > 0) all_sdnn.push(sdnn)
-                        if (ratio > 0) all_ratio.push(ratio)
+                        if (frequency > 0) all_frequency.push(frequency)
                     }
                 }
 
-                const mean_hrr =
-                    all_hrr.length > 1
-                        ? Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 10) / 10
-                        : all_hrr[0]
-                        ? Math.round(all_hrr[0] * 10) / 10
-                        : null
-                const mean_rmssd =
-                    all_rmssd.length > 1
-                        ? Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 10) / 10
-                        : all_rmssd[0]
-                        ? Math.round(all_rmssd[0] * 10) / 10
-                        : null
-                const mean_sdnn =
-                    all_sdnn.length > 1
-                        ? Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 10) / 10
-                        : all_sdnn[0]
-                        ? Math.round(all_sdnn[0] * 10) / 10
-                        : null
-                const mean_ratio =
-                    all_ratio.length > 1
-                        ? Math.round((all_ratio.reduce((a, b) => a + b) / all_ratio.length) * 10) / 10
-                        : all_ratio[0]
-                        ? Math.round(all_ratio[0] * 10) / 10
-                        : null
-                const hr_data = {
-                    user_id: valid_user_id,
-                    timestamp: Date.now(),
-                    max_hr: MAX_HR(all_hr),
-                    mean_hr: MEAN_HR(all_hr),
-                    min_hr: MIN_HR(all_hr),
-                }
-                const hrv_data = {
-                    user_id: valid_user_id,
-                    timestamp: Date.now(),
-                    hrr: mean_hrr,
-                    rmssd: mean_rmssd,
-                    sdnn: mean_sdnn,
-                    ratio: mean_ratio,
-                }
+                if (all_hr.length > 1) {
+                    const mean_hrr =
+                        all_hrr.length > 1
+                            ? Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 10) / 10
+                            : all_hrr[0] > 0
+                            ? Math.round(all_hrr[0] * 10) / 10
+                            : 0
+                    const mean_rmssd =
+                        all_rmssd.length > 1
+                            ? Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 10) / 10
+                            : all_rmssd[0] > 0
+                            ? Math.round(all_rmssd[0] * 10) / 10
+                            : 0
+                    const mean_sdnn =
+                        all_sdnn.length > 1
+                            ? Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 10) / 10
+                            : all_sdnn[0] > 0
+                            ? Math.round(all_sdnn[0] * 10) / 10
+                            : 0
+                    const mean_frequency =
+                        all_frequency.length > 1
+                            ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 10) / 10
+                            : all_frequency[0] > 0
+                            ? Math.round(all_frequency[0] * 10) / 10
+                            : 0
+                    const hr_data = {
+                        user_id: valid_user_id,
+                        timestamp: Date.now(),
+                        max_hr: MAX_HR(all_hr),
+                        mean_hr: MEAN_HR(all_hr),
+                        min_hr: MIN_HR(all_hr),
+                    }
+                    const hrv_data = {
+                        user_id: valid_user_id,
+                        timestamp: Date.now(),
+                        hrr: mean_hrr,
+                        rmssd: mean_rmssd,
+                        sdnn: mean_sdnn,
+                        frequency: mean_frequency,
+                    }
 
-                await CREATE_DATA(Five_minute_hr, hr_data)
-                await CREATE_DATA(Five_minute_hrv, hrv_data)
+                    await CREATE_DATA(Five_minute_hr, hr_data)
+                    await CREATE_DATA(Five_minute_hrv, hrv_data)
+                }
             }
         }
     } catch (err) {
@@ -266,28 +271,52 @@ let upload_data = async (
                 let user_hrv_data = all_hrv_data.filter((data) => data.user_id === user_id)
                 let user_hrv_data_length = user_hrv_data.length
                 let user_hrv_data_index = 0
-                let all_hrr = 0
-                let all_rmssd = 0
-                let all_sdnn = 0
+                let all_hrr = []
+                let all_rmssd = []
+                let all_sdnn = []
+                let all_frequency = []
 
                 do {
                     let data = user_hrv_data[user_hrv_data_index]
-                    all_hrr += data.hrr
-                    all_rmssd += data.rmssd
-                    all_sdnn += data.sdnn
+                    if (data.hrr > 0) all_hrr.push(data.hrr)
+                    if (data.rmssd > 0) all_rmssd.push(data.rmssd)
+                    if (data.sdnn > 0) all_sdnn.push(data.sdnn)
+                    if (data.frequency > 0) all_frequency.push(data.frequency)
                     user_hrv_data_index++
                 } while (user_hrv_data_index < user_hrv_data_length)
 
-                const total = user_hrv_data.length
-                const hrr = Math.round((all_hrr / total) * 10) / 10
-                const rmssd = Math.round((all_rmssd / total) * 10) / 10
-                const sdnn = Math.round((all_sdnn / total) * 10) / 10
+                const mean_hrr =
+                    all_hrr.length > 1
+                        ? Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 10) / 10
+                        : all_hrr[0] > 0
+                        ? Math.round(all_hrr[0] * 10) / 10
+                        : 0
+                const mean_rmssd =
+                    all_rmssd.length > 1
+                        ? Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 10) / 10
+                        : all_rmssd[0] > 0
+                        ? Math.round(all_rmssd[0] * 10) / 10
+                        : 0
+                const mean_sdnn =
+                    all_sdnn.length > 1
+                        ? Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 10) / 10
+                        : all_sdnn[0] > 0
+                        ? Math.round(all_sdnn[0] * 10) / 10
+                        : 0
+                const mean_frequency =
+                    all_frequency.length > 1
+                        ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 10) / 10
+                        : all_frequency[0] > 0
+                        ? Math.round(all_frequency[0] * 10) / 10
+                        : 0
+
                 const hrv_data = {
                     user_id: user_id,
                     timestamp: Date.now(),
-                    hrr: hrr,
-                    rmssd: rmssd,
-                    sdnn: sdnn,
+                    hrr: mean_hrr,
+                    rmssd: mean_rmssd,
+                    sdnn: mean_sdnn,
+                    frequency: mean_frequency,
                 }
 
                 await CREATE_DATA(upload_hrv_table, hrv_data)

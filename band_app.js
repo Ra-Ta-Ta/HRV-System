@@ -90,27 +90,29 @@ module.exports = async () => {
         }
 
         // 取得已註冊 user_id
-
-        let personnelData = await Personnel.findOne({ where: { mac: mac }, raw: true })
-
-        if (personnelData) {
-            let user_id = personnelData.user_id
-            let result = {
-                user_id: user_id,
-                mac: mac,
-                pair_type: pair_type,
-                hr: hr,
-                battery: battery,
-                rssi: rssi,
-                gateway: config.gateway,
-                step: step,
-                rri: rri,
-                charge: charge,
-                sos: sos,
-                timestamp: timestamp,
-                temperature: temperature,
+        try {
+            let personnelData = await Personnel.findOne({ where: { mac: mac }, raw: true })
+            if (personnelData) {
+                let user_id = personnelData.user_id
+                let result = {
+                    user_id: user_id,
+                    mac: mac,
+                    pair_type: pair_type,
+                    hr: hr,
+                    battery: battery,
+                    rssi: rssi,
+                    gateway: config.gateway,
+                    step: step,
+                    rri: rri,
+                    charge: charge,
+                    sos: sos,
+                    timestamp: timestamp,
+                    temperature: temperature,
+                }
+                return result
             }
-            return result
+        } catch (err) {
+            console.log(err)
         }
     }
 

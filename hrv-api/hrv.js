@@ -100,27 +100,6 @@ const api = {
             ctx.response.body = error.errors
         }
     },
-    readFrequencyDomain: async function (ctx) {
-        const { user_id, start_time, end_time } = ctx.params
-        try {
-            const result = await Five_minute_hrv.findAll({
-                attributes: ['ratio'],
-                where: {
-                    user_id: user_id,
-                    timestamp: { [Op.between]: [start_time, end_time] },
-                },
-                order: [['timestamp']],
-                raw: true,
-            })
-            const all_ratio = result.map((data) => data.ratio)
-            const total_ratio = all_ratio.reduce((a, b) => a + b)
-            const mean_ratio = Math.floor((total_ratio / result.length) * 100) / 100
-
-            ctx.response.body = mean_ratio
-        } catch (error) {
-            ctx.response.body = error.errors
-        }
-    },
 }
 
 module.exports = api

@@ -32,7 +32,7 @@ const api = {
                 `,
                 { raw: true, type: QueryTypes.SELECT }
             )
-            /* 測試區 */
+            // 國統測試用
 
             const [kuotung_data] = await kuotung_sequelize.query(
                 `
@@ -46,7 +46,7 @@ const api = {
                 `,
                 { raw: true, type: QueryTypes.SELECT }
             )
-            /* 測試區 */
+            // 國統測試用
             ctx.response.body = data ? data : kuotung_data
         } catch (error) {
             ctx.response.body = error.errors
@@ -54,18 +54,24 @@ const api = {
     },
     readAllCurrentData: async function (ctx) {
         try {
+            let newest_5minute_hrv = `SELECT f.user_id, m.max_timestamp as timestamp, f.rmssd, f.sdnn, f.hrr, f.frequency
+            FROM (
+                SELECT user_id, max(timestamp) as max_timestamp
+                FROM "5minute_hrv"
+                WHERE timestamp BETWEEN ${new Date().setMinutes(new Date().getMinutes() - 5, 0, 0)} AND ${Date.now()}
+                GROUP BY user_id
+            ) m
+            INNER JOIN "5minute_hrv" f ON 
+                f.user_id = m.user_id AND
+                f.timestamp = m.max_timestamp`
             let data = (
                 await sequelize.query(
                     `
-                    SELECT c.*, p.name, p.birthday, g.location, f.hrr, f.rmssd, f.sdnn, f.ratio
+                    SELECT c.*, p.name, p.birthday, g.location, f.hrr, f.rmssd, f.sdnn, f.frequency
                     FROM current_data c
                     INNER JOIN personnel p ON p.user_id = c.user_id
                     LEFT JOIN gateway g ON g.gateway = c.gateway
-                    LEFT JOIN (
-                        SELECT *
-                        FROM "5minute_hrv" 
-                        WHERE timestamp BETWEEN ${Date.now() - 60000} AND ${Date.now()}
-                    ) f ON f.user_id = c.user_id;
+                    LEFT JOIN (${newest_5minute_hrv}) f ON f.user_id = c.user_id;
                 `,
                     { raw: true, type: QueryTypes.SELECT }
                 )
@@ -73,7 +79,7 @@ const api = {
                 ...data,
                 timestamp: parseInt(data.timestamp, 10),
             }))
-            /* 測試區 */
+            // 國統測試用
             let kuotung_data = (
                 await kuotung_sequelize.query(
                     `
@@ -95,10 +101,7 @@ const api = {
             if (kuotung_data.length > 0) {
                 const kuotung_user_id = kuotung_data.map((data) => data.user_id)
                 const kuotung_hrv = (
-                    await Five_minute_hrv.findAll({
-                        where: { timestamp: { [Op.between]: [Date.now() - 60000, Date.now()] } },
-                        raw: true,
-                    })
+                    await sequelize.query(newest_5minute_hrv, { raw: true, type: QueryTypes.SELECT })
                 ).filter((data) => kuotung_user_id.includes(data.user_id))
 
                 for (let data of kuotung_data) {
@@ -123,17 +126,17 @@ const api = {
 
                         let [hrv] = kuotung_hrv.filter((kuotung_data) => kuotung_data.user_id === data.user_id)
                         if (hrv) {
-                            const { hrr, rmssd, sdnn, ratio } = hrv
-                            Object.assign(data, { hrr: hrr, rmssd: rmssd, sdnn: sdnn, ratio: ratio })
+                            const { hrr, rmssd, sdnn, frequency } = hrv
+                            Object.assign(data, { hrr: hrr, rmssd: rmssd, sdnn: sdnn, frequency: frequency })
                         } else {
-                            Object.assign(data, { hrr: null, rmssd: null, sdnn: null, ratio: null })
+                            Object.assign(data, { hrr: null, rmssd: null, sdnn: null, frequency: null })
                         }
                     }
                 }
 
                 data = data.concat(kuotung_data)
             }
-            /* 測試區 */
+            // 國統測試用
             ctx.response.body = data
         } catch (error) {
             ctx.response.body = error.errors
