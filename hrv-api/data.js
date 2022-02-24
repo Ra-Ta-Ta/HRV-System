@@ -28,7 +28,9 @@ const api = {
 
             if (all_data.length > 0) {
                 ctx.response.body = all_data
-            } else {
+            }
+            // 國統測試用
+            else {
                 all_data = await kuotung_sequelize.query(
                     `
                         SELECT d.hr, d.time as timestamp
@@ -41,6 +43,7 @@ const api = {
 
                 ctx.response.body = all_data
             }
+            // 國統測試用
         } catch (error) {
             ctx.response.body = error.errors
         }

@@ -154,7 +154,7 @@ Five_minute_hrv.init(
         sdnn: {
             type: Sequelize.REAL,
         },
-        ratio: {
+        frequency: {
             type: Sequelize.REAL,
         },
     },
@@ -185,6 +185,9 @@ One_hour_hrv.init(
         sdnn: {
             type: Sequelize.REAL,
         },
+        frequency: {
+            type: Sequelize.REAL,
+        },
     },
     {
         sequelize,
@@ -211,6 +214,9 @@ One_day_hrv.init(
             type: Sequelize.REAL,
         },
         sdnn: {
+            type: Sequelize.REAL,
+        },
+        frequency: {
             type: Sequelize.REAL,
         },
     },
@@ -241,6 +247,9 @@ One_week_hrv.init(
         sdnn: {
             type: Sequelize.REAL,
         },
+        frequency: {
+            type: Sequelize.REAL,
+        },
     },
     {
         sequelize,
@@ -267,6 +276,9 @@ One_month_hrv.init(
             type: Sequelize.REAL,
         },
         sdnn: {
+            type: Sequelize.REAL,
+        },
+        frequency: {
             type: Sequelize.REAL,
         },
     },

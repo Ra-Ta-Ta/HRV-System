@@ -23,8 +23,6 @@ router
     .get('/latest-1week-hrv/:user_id&:start_time&:end_time', Hrv.readLatest1WeekHrv)
     .get('/latest-1month-hrv/:user_id&:start_time&:end_time', Hrv.readLatest1MonthHrv)
 
-    .get('/frequency-domain/:user_id&:start_time&:end_time', Hrv.readFrequencyDomain)
-
     .get('/5minute-hr/:user_id&:start_time&:end_time', Hr.read5MinuteHr)
     .get('/latest-1day-hr/:user_id&:start_time&:end_time', Hr.readLatest1DayHr)
     .get('/latest-1month-hr/:user_id&:start_time&:end_time', Hr.readLatest1MonthHr)

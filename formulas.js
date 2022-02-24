@@ -64,9 +64,9 @@ const formulas = {
 
         const nHF = (HF / (TF - VLF)) * 100
         const nLF = (LF / (TF - VLF)) * 100
-        const ratio = nLF / nHF
+        const frequency = nLF / nHF
 
-        return ratio
+        return frequency > 0 ? frequency : 0
     },
     OUTLIER: (mean, sd, sd_scale) => {
         const Q1 = mean - sd * 0.675
