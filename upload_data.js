@@ -173,9 +173,9 @@ let upload_five_minute_data = async () => {
                             : 0
                     const mean_frequency =
                         all_frequency.length > 1
-                            ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 10) / 10
+                            ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 100) / 100
                             : all_frequency[0] > 0
-                            ? Math.round(all_frequency[0] * 10) / 10
+                            ? Math.round(all_frequency[0] * 100) / 100
                             : 0
                     const hr_data = {
                         user_id: valid_user_id,
@@ -305,9 +305,9 @@ let upload_data = async (
                         : 0
                 const mean_frequency =
                     all_frequency.length > 1
-                        ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 10) / 10
+                        ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 100) / 100
                         : all_frequency[0] > 0
-                        ? Math.round(all_frequency[0] * 10) / 10
+                        ? Math.round(all_frequency[0] * 100) / 100
                         : 0
 
                 const hrv_data = {

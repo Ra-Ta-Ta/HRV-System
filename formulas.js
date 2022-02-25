@@ -73,7 +73,7 @@ const formulas = {
         const Q3 = mean + sd * 0.675
         const IQR = Q3 - Q1
         const scale = (sd_scale - 0.675) / 1.35
-        const outlier = Math.round((Q1 - scale * IQR) * 10) / 10
+        const outlier = Math.round((Q1 - scale * IQR) * 100) / 100
         return outlier
     },
 }

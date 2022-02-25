@@ -176,7 +176,7 @@ let upload_five_minute_data = async () => {
                             : 0
                     const mean_frequency =
                         all_frequency.length > 1
-                            ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 10) / 10
+                            ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 100) / 100
                             : all_frequency[0]
                             ? all_frequency[0]
                             : 0
