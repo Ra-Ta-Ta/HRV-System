@@ -6,11 +6,11 @@ const formulas = {
     MIN_HR: (all_hr) => all_hr.reduce((a, b) => Math.min(a, b)),
     SDNN: (all_rri) => {
         const sdnn = Time.SDNN(all_rri)
-        return sdnn
+        return sdnn > 0 ? sdnn : 0
     },
     RMSSD: (all_rri) => {
         const rmssd = Time.RMSSD(all_rri)
-        return rmssd
+        return rmssd > 0 ? rmssd : 0
     },
     HRR: (age, current_hr, current_max_hr) => {
         // 最大心率估計方式採用Jackson et al. (2007)提出對年齡校正之預估公式HRmax= 206.9 - (0.67＊Age)。
@@ -23,7 +23,7 @@ const formulas = {
         let hrr = max_hr - rest_hr
         // %HRR為HRR的量化指標，%HRR = (HRex – HRrest)/(HRmax – HRrest)。
         let percent_hrr = ((current_hr - rest_hr) / hrr) * 100
-        return percent_hrr
+        return percent_hrr > 0 ? percent_hrr : 0
     },
     FFT: (all_rri) => {
         const { fft, util } = require('fft-js')
