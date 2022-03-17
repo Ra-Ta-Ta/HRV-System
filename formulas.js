@@ -1,6 +1,18 @@
 const { Time } = require('@avihimsa/heart-rate-variability-analysis')
 const formulas = {
-    AGE: (birthday) => (birthday !== null ? new Date().getFullYear() - new Date(birthday).getFullYear() : 40),
+    AGE: (user_birthday) => {
+        let age = 40
+        if (user_birthday) {
+            const current = new Date()
+            const birthday = new Date(parseInt(user_birthday, 10))
+            age = current.getFullYear() - birthday.getFullYear()
+            const month_difference = current.getMonth() - birthday.getMonth()
+            if (month_difference < 0 || (month_difference === 0 && current.getDate() < birthday.getDate())) {
+                age--
+            }
+        }
+        return age
+    },
     MEAN_HR: (all_hr) => all_hr.reduce((a, b) => a + b) / all_hr.length,
     MAX_HR: (all_hr) => all_hr.reduce((a, b) => Math.max(a, b)),
     MIN_HR: (all_hr) => all_hr.reduce((a, b) => Math.min(a, b)),
@@ -45,26 +57,27 @@ const formulas = {
         const points = frequencies.map(function (f, ix) {
             return { x: ms_to_s(f), y: magnitudes[ix] / (bufferSize / 2) }
         })
-        let TF = []
+        // let TF = []
         let HF = []
         let LF = []
-        let VLF = []
+        // let VLF = []
 
         for (let point of points) {
-            TF.push(point.y)
+            // TF.push(point.y)
             if (point.x >= 0.15 && point.x <= 0.4) HF.push(point.y)
             else if (point.x >= 0.04 && point.x < 0.15) LF.push(point.y)
-            else if (point.x < 0.04) VLF.push(point.y)
+            // else if (point.x < 0.04) VLF.push(point.y)
         }
 
-        TF = TF.length > 1 ? TF.reduce((a, b) => a + b) : TF[0]
+        // TF = TF.length > 1 ? TF.reduce((a, b) => a + b) : TF[0]
         HF = HF.length > 1 ? HF.reduce((a, b) => a + b) : HF[0]
         LF = LF.length > 1 ? LF.reduce((a, b) => a + b) : LF[0]
-        VLF = VLF.length > 1 ? VLF.reduce((a, b) => a + b) : VLF[0]
+        // VLF = VLF.length > 1 ? VLF.reduce((a, b) => a + b) : VLF[0]
 
-        const nHF = (HF / (TF - VLF)) * 100
-        const nLF = (LF / (TF - VLF)) * 100
-        const frequency = nLF / nHF
+        // const nHF = (HF / (TF - VLF)) * 100
+        // const nLF = (LF / (TF - VLF)) * 100
+        // const frequency = nLF / nHF
+        const frequency = LF / HF
 
         return frequency > 0 ? frequency : 0
     },

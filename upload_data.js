@@ -144,19 +144,19 @@ let upload_five_minute_data = async () => {
                     const hrr =
                         all_hrr.length > 1
                             ? Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 100) / 100
-                            : all_hrr[0]
+                            : Math.round(all_hrr[0] * 100) / 100
                     const rmssd =
                         all_rmssd.length > 1
                             ? Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 100) / 100
-                            : all_rmssd[0]
+                            : Math.round(all_rmssd[0] * 100) / 100
                     const sdnn =
                         all_sdnn.length > 1
                             ? Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 100) / 100
-                            : all_sdnn[0]
+                            : Math.round(all_sdnn[0] * 100) / 100
                     const frequency =
                         all_frequency.length > 1
                             ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 100) / 100
-                            : all_frequency[0]
+                            : Math.round(all_frequency[0] * 100) / 100
                     hr_data = {
                         user_id: valid_user_id,
                         timestamp: Date.now(),
