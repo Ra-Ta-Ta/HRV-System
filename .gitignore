@@ -40,3 +40,6 @@ testem.log
 Thumbs.db
 log/log.log
 log/log.out
+
+# test
+upload_data_kuotung.js
