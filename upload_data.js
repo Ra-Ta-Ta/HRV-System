@@ -79,11 +79,19 @@ let upload_five_minute_data = async () => {
                     }
                 })
 
+                let all_hr = []
+                let all_rri = []
+
+                for (let hr_group of all_hr_group) {
+                    hr_group = hr_group.map((data) => data.hr)
+                    const rri_group = hr_group.map((hr) => 60000 / hr)
+                    all_hr = all_hr.concat(hr_group)
+                    all_rri = all_rri.concat(rri_group)
+                }
+
                 const all_hrr = []
                 const all_rmssd = []
                 const all_sdnn = []
-                const all_frequency = []
-                let all_hr = []
 
                 for (let hr_group of all_hr_group) {
                     const interval = 5000
@@ -120,7 +128,6 @@ let upload_five_minute_data = async () => {
                     const data_is_computable = [...new Set(all_one_second_hr)].length > 1
 
                     if (data_is_computable) {
-                        all_hr = all_hr.concat(all_one_second_hr)
                         const all_rri = all_one_second_hr.map((hr) => 60000 / hr)
                         const hrr = HRR(
                             AGE(user_data[0].birthday),
@@ -129,12 +136,10 @@ let upload_five_minute_data = async () => {
                         )
                         const rmssd = RMSSD(all_rri)
                         const sdnn = SDNN(all_rri)
-                        const frequency = FFT(all_rri)
 
                         all_hrr.push(hrr)
                         all_rmssd.push(rmssd)
                         all_sdnn.push(sdnn)
-                        all_frequency.push(frequency)
                     }
                 }
 
@@ -153,10 +158,8 @@ let upload_five_minute_data = async () => {
                         all_sdnn.length > 1
                             ? Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 100) / 100
                             : Math.round(all_sdnn[0] * 100) / 100
-                    const frequency =
-                        all_frequency.length > 1
-                            ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 100) / 100
-                            : Math.round(all_frequency[0] * 100) / 100
+                    const frequency = FFT(all_rri)
+
                     hr_data = {
                         user_id: valid_user_id,
                         timestamp: Date.now(),
