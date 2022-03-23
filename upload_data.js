@@ -79,60 +79,52 @@ let upload_five_minute_data = async () => {
                     }
                 })
 
-                let all_hr = []
-                let all_rri = []
-
-                for (let hr_group of all_hr_group) {
-                    hr_group = hr_group.map((data) => data.hr)
-                    const rri_group = hr_group.map((hr) => 60000 / hr)
-                    all_hr = all_hr.concat(hr_group)
-                    all_rri = all_rri.concat(rri_group)
-                }
-
                 const all_hrr = []
                 const all_rmssd = []
                 const all_sdnn = []
+                const all_frequency = []
+                let all_hr = []
 
                 for (let hr_group of all_hr_group) {
                     const interval = 5000
                     const start_timestamp = hr_group[0]['timestamp']
                     let end_timestamp = start_timestamp + interval
-                    let all_one_second_group = []
+                    let all_five_second_hr = []
+                    let all_rri = []
 
                     for (let hr_data of hr_group) {
                         const { hr, timestamp } = hr_data
-                        const last_group = all_one_second_group[all_one_second_group.length - 1]
+                        const last_group = all_five_second_hr[all_five_second_hr.length - 1]
 
                         if (last_group) {
                             if (timestamp > end_timestamp) {
                                 end_timestamp = timestamp + interval
-                                all_one_second_group.push([hr])
+                                all_five_second_hr.push([hr])
                             } else {
                                 last_group.push(hr)
                             }
                         } else {
-                            all_one_second_group.push([hr])
+                            all_five_second_hr.push([hr])
                         }
+
+                        all_hr.push(hr)
+                        all_rri.push(60000 / hr)
                     }
 
-                    const all_one_second_hr = all_one_second_group.map((one_second_group) => {
-                        const all_hr = [...new Set(one_second_group)]
-                        const all_hr_length = all_hr.length
-                        if (all_hr_length === 1) {
-                            return all_hr[0]
-                        } else {
-                            return Math.round(all_hr.reduce((a, b) => a + b) / all_hr_length)
-                        }
-                    })
+                    const frequency = FFT(all_rri)
+                    all_frequency.push(frequency)
 
-                    const data_is_computable = [...new Set(all_one_second_hr)].length > 1
+                    all_five_second_hr = all_five_second_hr.map((five_second_hr) =>
+                        Math.round(five_second_hr.reduce((a, b) => a + b) / five_second_hr.length)
+                    )
+                    const data_is_computable = [...new Set(all_five_second_hr)].length > 1
 
                     if (data_is_computable) {
-                        const all_rri = all_one_second_hr.map((hr) => 60000 / hr)
+                        const all_rri = all_five_second_hr.map((hr) => 60000 / hr)
                         const hrr = HRR(
                             AGE(user_data[0].birthday),
-                            MEAN_HR(all_one_second_hr),
-                            MAX_HR(all_one_second_hr)
+                            MEAN_HR(all_five_second_hr),
+                            MAX_HR(all_five_second_hr)
                         )
                         const rmssd = RMSSD(all_rri)
                         const sdnn = SDNN(all_rri)
@@ -146,19 +138,14 @@ let upload_five_minute_data = async () => {
                 let hr_data, hrv_data
 
                 if (all_hr.length > 1) {
-                    const hrr =
-                        all_hrr.length > 1
-                            ? Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 100) / 100
-                            : Math.round(all_hrr[0] * 100) / 100
-                    const rmssd =
-                        all_rmssd.length > 1
-                            ? Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 100) / 100
-                            : Math.round(all_rmssd[0] * 100) / 100
-                    const sdnn =
-                        all_sdnn.length > 1
-                            ? Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 100) / 100
-                            : Math.round(all_sdnn[0] * 100) / 100
-                    const frequency = FFT(all_rri)
+                    const calculator = (data) =>
+                        data.length > 1
+                            ? Math.round((data.reduce((a, b) => a + b) / data.length) * 100) / 100
+                            : Math.round(data[0] * 100) / 100
+                    const hrr = calculator(all_hrr)
+                    const rmssd = calculator(all_rmssd)
+                    const sdnn = calculator(all_sdnn)
+                    const frequency = calculator(all_frequency)
 
                     hr_data = {
                         user_id: valid_user_id,
@@ -212,40 +199,33 @@ let upload_data = async (
     upload_hrv_table
 ) => {
     try {
-        let all_hr_data = await source_hr_table.findAll({
+        const all_hr_data = await source_hr_table.findAll({
             where: { timestamp: { [Op.gte]: start_time, [Op.lt]: end_time } },
         })
 
         if (all_hr_data.length > 0) {
-            let all_user_id = [...new Set(all_hr_data.map((data) => data.user_id))]
-            let all_user_id_length = all_user_id.length
-            let all_user_id_index = 0
+            const all_user_id = [...new Set(all_hr_data.map((data) => data.user_id))]
 
-            do {
-                let user_id = all_user_id[all_user_id_index]
-                let user_hr_data = all_hr_data.filter(
+            for (let user_id of all_user_id) {
+                const all_data = all_hr_data.filter(
                     (data) => data.user_id === user_id && data.max_hr > 0 && data.mean_hr > 0 && data.min_hr > 0
                 )
-                let user_hr_data_length = user_hr_data.length
+                const all_data_length = all_data.length
 
-                if (user_hr_data_length > 0) {
-                    let user_hr_data_index = 0
+                if (all_data_length > 0) {
                     let all_max_hr = 0
                     let all_mean_hr = 0
                     let all_min_hr = 0
 
-                    do {
-                        let data = user_hr_data[user_hr_data_index]
+                    for (let data of all_data) {
                         all_max_hr += data.max_hr
                         all_mean_hr += data.mean_hr
                         all_min_hr += data.min_hr
-                        user_hr_data_index++
-                    } while (user_hr_data_index < user_hr_data_length)
+                    }
 
-                    let total = user_hr_data.length
-                    let max_hr = Math.round(all_max_hr / total)
-                    let mean_hr = Math.round((all_mean_hr / total) * 10) / 10
-                    let min_hr = Math.round(all_min_hr / total)
+                    let max_hr = Math.round(all_max_hr / all_data_length)
+                    let mean_hr = Math.round((all_mean_hr / all_data_length) * 10) / 10
+                    let min_hr = Math.round(all_min_hr / all_data_length)
                     let hr_data = {
                         user_id: user_id,
                         timestamp: Date.now(),
@@ -266,23 +246,18 @@ let upload_data = async (
 
                     await CREATE_DATA(upload_hr_table, hr_data)
                 }
-
-                all_user_id_index++
-            } while (all_user_id_index < all_user_id_length)
+            }
         }
 
-        let all_hrv_data = await source_hrv_table.findAll({
+        const all_hrv_data = await source_hrv_table.findAll({
             where: { timestamp: { [Op.gte]: start_time, [Op.lt]: end_time } },
         })
 
         if (all_hrv_data.length > 0) {
-            let all_user_id = [...new Set(all_hrv_data.map((data) => data.user_id))]
-            let all_user_id_length = all_user_id.length
-            let all_user_id_index = 0
+            const all_user_id = [...new Set(all_hrv_data.map((data) => data.user_id))]
 
-            do {
-                let user_id = all_user_id[all_user_id_index]
-                let user_hrv_data = all_hrv_data.filter(
+            for (let user_id of all_user_id) {
+                const all_data = all_hrv_data.filter(
                     (data) =>
                         data.user_id === user_id &&
                         data.hrr > 0 &&
@@ -290,49 +265,30 @@ let upload_data = async (
                         data.sdnn > 0 &&
                         data.frequency > 0
                 )
-                let user_hrv_data_length = user_hrv_data.length
 
-                if (user_hrv_data_length > 0) {
-                    let user_hrv_data_index = 0
-                    let all_hrr = []
-                    let all_rmssd = []
-                    let all_sdnn = []
-                    let all_frequency = []
+                if (all_data.length > 0) {
+                    const all_hrr = []
+                    const all_rmssd = []
+                    const all_sdnn = []
+                    const all_frequency = []
 
-                    do {
-                        let data = user_hrv_data[user_hrv_data_index]
+                    for (let data of all_data) {
                         all_hrr.push(data.hrr)
                         all_rmssd.push(data.rmssd)
                         all_sdnn.push(data.sdnn)
                         all_frequency.push(data.frequency)
-                        user_hrv_data_index++
-                    } while (user_hrv_data_index < user_hrv_data_length)
+                    }
 
-                    const hrr =
-                        all_hrr.length > 1
-                            ? Math.round((all_hrr.reduce((a, b) => a + b) / all_hrr.length) * 100) / 100
-                            : all_hrr[0] > 0
-                            ? Math.round(all_hrr[0] * 100) / 100
+                    const calculator = (data) =>
+                        data.length > 1
+                            ? Math.round((data.reduce((a, b) => a + b) / data.length) * 100) / 100
+                            : data[0] > 0
+                            ? Math.round(data[0] * 100) / 100
                             : 0
-                    const rmssd =
-                        all_rmssd.length > 1
-                            ? Math.round((all_rmssd.reduce((a, b) => a + b) / all_rmssd.length) * 100) / 100
-                            : all_rmssd[0] > 0
-                            ? Math.round(all_rmssd[0] * 100) / 100
-                            : 0
-                    const sdnn =
-                        all_sdnn.length > 1
-                            ? Math.round((all_sdnn.reduce((a, b) => a + b) / all_sdnn.length) * 100) / 100
-                            : all_sdnn[0] > 0
-                            ? Math.round(all_sdnn[0] * 100) / 100
-                            : 0
-                    const frequency =
-                        all_frequency.length > 1
-                            ? Math.round((all_frequency.reduce((a, b) => a + b) / all_frequency.length) * 100) / 100
-                            : all_frequency[0] > 0
-                            ? Math.round(all_frequency[0] * 100) / 100
-                            : 0
-
+                    const hrr = calculator(all_hrr)
+                    const rmssd = calculator(all_rmssd)
+                    const sdnn = calculator(all_sdnn)
+                    const frequency = calculator(all_frequency)
                     const hrv_data = {
                         user_id: user_id,
                         timestamp: Date.now(),
@@ -355,9 +311,7 @@ let upload_data = async (
 
                     await CREATE_DATA(upload_hrv_table, hrv_data)
                 }
-
-                all_user_id_index++
-            } while (all_user_id_index < all_user_id_length)
+            }
         }
     } catch (err) {
         console.log(err)

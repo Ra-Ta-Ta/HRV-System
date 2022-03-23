@@ -9,7 +9,7 @@ const methods = {
             let result = table.create(data)
             return result
         } catch (error) {
-            console.log(error.errors)
+            console.log(error)
         }
     },
     GET_DATA: (table, user_id, start_time, end_time) => {
@@ -19,7 +19,7 @@ const methods = {
             })
             return result
         } catch (error) {
-            console.log(error.errors)
+            console.log(error)
         }
     },
     GET_PERSONNELS_DATA: () => {
@@ -27,7 +27,7 @@ const methods = {
             let result = Personnel.findAll()
             return result
         } catch (error) {
-            console.log(error.errors)
+            console.log(error)
         }
     },
     UPDATE_DATA: (table, data) => {
@@ -36,7 +36,7 @@ const methods = {
             let result = table.update(data, { where: { user_id: user_id } })
             return result
         } catch (error) {
-            console.log(error.errors)
+            console.log(error)
         }
     },
     UPDATE_GATEWAY: (data) => {
