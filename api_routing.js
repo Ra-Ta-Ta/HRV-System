@@ -5,6 +5,7 @@ const fs = require('fs')
 const Data = require('./hrv-api/data')
 const Current_data = require('./hrv-api/current_data')
 const Personnel = require('./hrv-api/personnel')
+const Login = require('./hrv-api/login')
 const Wristband = require('./hrv-api/wristband')
 const Gateway = require('./hrv-api/gateway')
 const Hrv = require('./hrv-api/hrv')
@@ -36,6 +37,8 @@ router
     .put('/personnel', Personnel.updatePersonnel)
     .put('/personnel/pair-mac', Personnel.updatePairedMac)
     .del('/personnel/:user_id', Personnel.deletePersonnel)
+
+    .post('/login', Login.login)
 
     .post('/wristband', Wristband.createWristband)
     .get('/wristbands', Wristband.readWristbands)

@@ -26,6 +26,7 @@
         "jstat": "^1.9.5",
         "koa": "^2.7.0",
         "koa-bodyparser": "^4.2.1",
+        "koa-jwt": "^4.0.3",
         "koa-router": "^7.4.0",
         "koa-static": "^5.0.0",
         "koa2-cors": "^2.0.6",

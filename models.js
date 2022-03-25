@@ -29,6 +29,8 @@ class One_month_hr extends Model {}
 
 class Personnel extends Model {}
 
+class User extends Model {}
+
 class Gateway extends Model {}
 
 class Wristband extends Model {}
@@ -463,6 +465,28 @@ Personnel.init(
     }
 )
 
+User.init(
+    {
+        id: {
+            type: Sequelize.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
+        username: {
+            type: Sequelize.STRING,
+        },
+        password: {
+            type: Sequelize.STRING,
+        },
+    },
+    {
+        sequelize,
+        modelName: 'user',
+        timestamps: false,
+        freezeTableName: true,
+    }
+)
+
 Gateway.init(
     {
         gateway: {
@@ -549,6 +573,7 @@ module.exports = {
     One_week_hr,
     One_month_hr,
     Personnel,
+    User,
     Gateway,
     Wristband,
     sequelize,
