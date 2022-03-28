@@ -23,6 +23,7 @@
         "binding": "^3.0.3",
         "fft-js": "0.0.12",
         "fourier-transform": "^1.1.2",
+        "jsonwebtoken": "^8.5.1",
         "jstat": "^1.9.5",
         "koa": "^2.7.0",
         "koa-bodyparser": "^4.2.1",

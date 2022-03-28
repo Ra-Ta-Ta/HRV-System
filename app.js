@@ -13,14 +13,37 @@ const open = require('open')
 
 // koa 相關套件
 const koa = require('koa')
-const app = new koa()
 const cors = require('koa2-cors')
 const bodyParser = require('koa-bodyparser')
+const koaJwt = require('koa-jwt')
+const jsonToken = require('jsonwebtoken')
 const router = require('./api_routing')
 // const serve = require('koa-static')
+const SECRET = 'gini'
+const app = new koa()
 
 app.use(cors())
+// middleware
+app.use((ctx, next) => {
+    return next().catch((err) => {
+        console.log('err.status', err.status)
+        if (err.status == 401) {
+            ctx.status = 401
+            ctx.body = {
+                code: 401,
+                message: 'Login has expired or has not logged in yet',
+            }
+        } else {
+            throw err
+        }
+    })
+})
 app.use(bodyParser())
+app.use(
+    koaJwt({ secret: SECRET }).unless({
+        path: [/^\/api\/login/],
+    })
+)
 app.use(router.routes())
 app.use(router.allowedMethods())
 // app.use(serve(__dirname + '/dist'))
