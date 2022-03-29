@@ -27,7 +27,7 @@ const api = {
             }
             ctx.response.body = result.length > 0 ? result : null
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
     readLatest1DayHr: async function (ctx) {
@@ -40,7 +40,7 @@ const api = {
             })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
     readLatest1MonthHr: async function (ctx) {
@@ -53,7 +53,7 @@ const api = {
             })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 }

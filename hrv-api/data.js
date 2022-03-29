@@ -45,7 +45,7 @@ const api = {
             }
             // 國統測試用
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 }

@@ -30,6 +30,7 @@ app.use((ctx, next) => {
         if (err.status == 401) {
             ctx.status = 401
             ctx.body = {
+                status: 'fail',
                 code: 401,
                 message: 'Login has expired or has not logged in yet',
             }

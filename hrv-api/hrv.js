@@ -18,7 +18,7 @@ const api = {
             })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
     readLatest5MinuteHrv: async function (ctx) {
@@ -31,7 +31,7 @@ const api = {
             })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
     read1HourHrv: async function (ctx) {
@@ -43,7 +43,7 @@ const api = {
             })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
     read1DayHrv: async function (ctx) {
@@ -56,7 +56,7 @@ const api = {
 
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
     readLatest1DayHrv: async function (ctx) {
@@ -70,7 +70,7 @@ const api = {
             })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
     readLatest1WeekHrv: async function (ctx) {
@@ -83,7 +83,7 @@ const api = {
             })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
     readLatest1MonthHrv: async function (ctx) {
@@ -97,7 +97,7 @@ const api = {
 
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 }

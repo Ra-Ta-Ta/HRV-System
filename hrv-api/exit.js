@@ -4,7 +4,7 @@ const api = {
         try {
             process.kill(process.pid, 'SIGTERM')
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 }

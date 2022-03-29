@@ -18,7 +18,7 @@ const api = {
             let result = await Gateway.create(params, { raw: true })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -28,7 +28,7 @@ const api = {
             let result = await Gateway.findAll({ raw: true })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -39,7 +39,7 @@ const api = {
             let result = await Gateway.findOne({ where: { gateway: gateway }, raw: true })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -59,7 +59,7 @@ const api = {
             )
             ctx.response.body = '定位器地點已成功更新'
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -74,7 +74,7 @@ const api = {
             })
             ctx.response.body = `已刪除定位器 ${gateway} .`
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 }

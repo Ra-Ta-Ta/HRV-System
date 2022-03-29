@@ -19,7 +19,7 @@ const api = {
             let result = await Wristband.create(params, { raw: true })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -29,7 +29,7 @@ const api = {
             let result = await Wristband.findAll({ raw: true })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -40,7 +40,7 @@ const api = {
             let result = await Wristband.findOne({ where: { mac: mac }, raw: true })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -96,7 +96,7 @@ const api = {
 
             ctx.response.body = '手環已成功更新'
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -113,7 +113,7 @@ const api = {
             })
             ctx.response.body = `已刪除手環 ${mac} .`
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 }

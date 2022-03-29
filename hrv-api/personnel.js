@@ -35,7 +35,7 @@ const api = {
             await Current_data.create(current_Data, { raw: true })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -45,7 +45,7 @@ const api = {
             let result = await Personnel.findAll({ raw: true })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -56,7 +56,7 @@ const api = {
             let result = await Personnel.findOne({ where: { user_id: user_id }, raw: true })
             ctx.response.body = result
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -81,7 +81,7 @@ const api = {
             ).catch((err) => console.log(err))
             ctx.response.body = '使用者已成功更新'
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -134,7 +134,7 @@ const api = {
             )
             ctx.response.body = `使用者 ${data.user_id} 已成功配對手環 ${data.mac}.`
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 
@@ -164,7 +164,7 @@ const api = {
             })
             ctx.response.body = `已刪除使用者 ${user_id} .`
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 }

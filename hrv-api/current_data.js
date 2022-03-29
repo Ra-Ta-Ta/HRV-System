@@ -49,7 +49,7 @@ const api = {
             // 國統測試用
             ctx.response.body = data ? data : kuotung_data
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
     readAllCurrentData: async function (ctx) {
@@ -139,7 +139,7 @@ const api = {
             // 國統測試用
             ctx.response.body = data
         } catch (error) {
-            ctx.response.body = error.errors
+            ctx.response.body = error
         }
     },
 }
