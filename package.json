@@ -1,11 +1,11 @@
 {
-    "name": "hrv-system",
+    "name": "Heart_Rate_Variability_Analysis_System",
     "version": "1.0.0",
-    "description": "hrv-system",
-    "main": "app.js",
+    "description": "",
+    "main": "./server/app.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node --max_old_space_size=8192 app.js",
+        "start": "node --max_old_space_size=8192 ./server/app.js",
         "pkg": "pkg -t win package.json"
     },
     "repository": {

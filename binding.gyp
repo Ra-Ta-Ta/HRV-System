@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "binding",
-      "sources": [ "./build/binding.vcxproj" ]
+      "sources": [ "./build/binding.Makefile" ]
     }
   ]
-}
+} 
