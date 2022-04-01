@@ -1,14 +1,17 @@
-const { gateway } = require('./config')
+// 上傳手環相關資料 (如主機藍芽不支援此功能，請註解此行)
+const Band = require('./utils/band_app')()
+// 上傳心率變異分析
+const Upload_data = require('./utils/upload_data')()
+// koa 相關套件
 const koa = require('koa')
 const cors = require('koa2-cors')
 const bodyParser = require('koa-bodyparser')
 const koaJwt = require('koa-jwt')
-const serve = require('koa-static')
 const router = require('./routes/routes')
+const serve = require('koa-static')
+const { parseToken, getTokenRenewStatus, createNewToken } = require('./utils/token')
+const SECRET = require('./config').gateway
 const open = require('open')
-const Band = require('./utils/band_app')()
-const Upload_data = require('./utils/upload_data')()
-const SECRET = gateway
 const app = new koa()
 
 app.use(cors())
@@ -32,15 +35,14 @@ app.use(
         path: [/^\/api\/login/],
     })
 )
-app.use(router.routes())
-app.use(router.allowedMethods())
-app.use(serve(__dirname + '/dashboard'))
+app.use(router.routes(), router.allowedMethods())
+app.use(serve(__dirname + '/server/dashboard'))
 
 const server = app.listen(3000, () => {
     open('http://localhost:3000', {
-        // app: {
-        //     name: open.apps.edge,
-        // },
+        //     app: {
+        //         name: open.apps.edge,
+        //     },
     })
 })
 
