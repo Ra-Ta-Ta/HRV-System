@@ -36,8 +36,6 @@ class Gateway extends Model {}
 
 class Wristband extends Model {}
 
-class Token extends Model {}
-
 Data.init(
     {
         user_id: {
@@ -534,24 +532,6 @@ Wristband.init(
     }
 )
 
-Token.init(
-    {
-        username: {
-            type: Sequelize.STRING(20),
-            primaryKey: true,
-        },
-        timestamp: {
-            type: Sequelize.BIGINT,
-        },
-    },
-    {
-        sequelize,
-        modelName: 'token',
-        timestamps: false,
-        freezeTableName: true,
-    }
-)
-
 sequelize.sync()
 User.create({ username: 'admin', password: 'admin123456' })
 module.exports = {
@@ -571,6 +551,4 @@ module.exports = {
     User,
     Gateway,
     Wristband,
-    Token,
-    sequelize,
 }

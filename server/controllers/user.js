@@ -1,8 +1,5 @@
-const { Op } = require('sequelize')
 const { User, Token } = require('../models/models')
-const jsonToken = require('jsonwebtoken')
-const { gateway } = require('../config')
-const SECRET = gateway
+const { getToken, getTokenRenewStatus, createNewToken } = require('../utils/token')
 
 const api = {
     login: async function (ctx) {
@@ -17,15 +14,13 @@ const api = {
                 },
                 raw: true,
             })
+
             if (data) {
-                let userToken = { username: username }
-                let token = jsonToken.sign(userToken, SECRET, { expiresIn: '0.5h' })
-                await Token.upsert({ username: username, timestamp: Date.now() }, { fields: ['timestamp'] })
                 ctx.response.body = {
                     status: 'success',
                     code: 200,
                     message: 'login success',
-                    token,
+                    token: getToken({ username, password }),
                 }
             } else {
                 ctx.response.body = {
@@ -39,24 +34,14 @@ const api = {
         }
     },
     checkStatus: async function (ctx) {
-        let { username } = ctx.request.body
+        let { token } = ctx.request.body
         try {
-            let data = await Token.findOne({
-                where: {
-                    username: username,
-                    timestamp: { [Op.between]: [Date.now() - 86400000, Date.now()] },
-                },
-                raw: true,
-            })
-
-            if (data) {
-                let userToken = { username: username }
-                let token = jsonToken.sign(userToken, SECRET, { expiresIn: '0.5h' })
+            if (getTokenRenewStatus(token)) {
                 ctx.response.body = {
                     status: 'success',
                     code: 200,
-                    message: 'Token has been refreshed',
-                    token,
+                    message: 'Token is still alive',
+                    token: createNewToken(token),
                 }
             } else {
                 ctx.response.body = {
