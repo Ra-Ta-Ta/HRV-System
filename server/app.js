@@ -40,9 +40,9 @@ app.use(serve(__dirname + '/server/dashboard'))
 
 const server = app.listen(3000, () => {
     open('http://localhost:3000', {
-        //     app: {
-        //         name: open.apps.edge,
-        //     },
+        // app: {
+        //     name: open.apps.edge,
+        // },
     })
 })
 
