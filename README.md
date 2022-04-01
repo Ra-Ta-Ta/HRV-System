@@ -2,10 +2,13 @@
 
 ## Description
 
+Heart rate variability analysis system is used for the calculation of physiological measurements such as stress level, fatigue level and exercise load. Meanwhile, with gateway, the user's location can be tracked at any time.
+
 The system using :
 
 -   Koa 2
 -   postgres 14
+-   [Zadig](https://zadig.akeo.ie/) (For Windows)
 
 ## Running
 
@@ -25,7 +28,7 @@ Start a Local Server
 npm start
 ```
 
-**Note : Please make sure your PostgreSQL is running before using `npm start` or `npm run prod`**
+**Note : Please make sure your PostgreSQL is running before using `npm start`**
 
 ## License
 
