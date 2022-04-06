@@ -2,7 +2,7 @@ const { Gateway } = require('../models/models')
 
 const api = {
     // 新增單一新定位器
-    createGateway: async function (ctx) {
+    createGateway: async (ctx) => {
         const data = ctx.request.body
         try {
             const params = {
@@ -16,7 +16,7 @@ const api = {
     },
 
     // 取得定位器列表
-    readGateways: async function (ctx) {
+    readGateways: async (ctx) => {
         try {
             let result = await Gateway.findAll({ raw: true })
             ctx.response.body = result
@@ -26,7 +26,7 @@ const api = {
     },
 
     // 取單一定位器
-    readGateway: async function (ctx) {
+    readGateway: async (ctx) => {
         const gateway = ctx.params.gateway
         try {
             let result = await Gateway.findOne({ where: { gateway: gateway }, raw: true })
@@ -37,7 +37,7 @@ const api = {
     },
 
     // 更新單一定位器的地點
-    updateGateway: async function (ctx) {
+    updateGateway: async (ctx) => {
         const data = ctx.request.body
         try {
             await Gateway.update(
@@ -57,7 +57,7 @@ const api = {
     },
 
     // 刪除單一定位器
-    deleteGateway: async function (ctx) {
+    deleteGateway: async (ctx) => {
         const gateway = ctx.params.gateway
         try {
             await Gateway.destroy({

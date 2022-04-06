@@ -10,7 +10,7 @@ const sequelize = new Sequelize(postgreServerUrl, {
 
 const api = {
     // 取得單一使用者即時資料
-    readCurrentData: async function (ctx) {
+    readCurrentData: async (ctx) => {
         const { user_id } = ctx.params
         try {
             const [data] = await sequelize.query(
@@ -28,7 +28,8 @@ const api = {
             ctx.response.body = error
         }
     },
-    readAllCurrentData: async function (ctx) {
+    // 取得所有使用者即時資料
+    readAllCurrentData: async (ctx) => {
         try {
             let newest_5minute_hrv = `SELECT f.user_id, m.max_timestamp as timestamp, f.rmssd, f.sdnn, f.hrr, f.frequency
             FROM (

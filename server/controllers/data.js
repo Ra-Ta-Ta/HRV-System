@@ -3,7 +3,7 @@ const { Data } = require('../models/models')
 
 const api = {
     // 取得單一使用者區間資料
-    readData: async function (ctx) {
+    readData: async (ctx) => {
         let { user_id, start_time, end_time } = ctx.params
         try {
             let all_data = await Data.findAll({

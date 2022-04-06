@@ -1,6 +1,6 @@
 const api = {
     // close node
-    exit: async function (ctx) {
+    exit: async (ctx) => {
         try {
             process.kill(process.pid, 'SIGTERM')
         } catch (error) {

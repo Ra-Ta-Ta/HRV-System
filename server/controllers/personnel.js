@@ -2,7 +2,7 @@ const { Data, Current_data, Personnel, Wristband } = require('../models/models')
 
 const api = {
     // 新增單一新使用者
-    createPersonnel: async function (ctx) {
+    createPersonnel: async (ctx) => {
         const data = ctx.request.body
         try {
             const personnel_data = {
@@ -34,7 +34,7 @@ const api = {
     },
 
     // 取得使用者列表
-    readPersonnels: async function (ctx) {
+    readPersonnels: async (ctx) => {
         try {
             let result = await Personnel.findAll({ raw: true })
             ctx.response.body = result
@@ -44,7 +44,7 @@ const api = {
     },
 
     // 取得單一使用者
-    readPersonnel: async function (ctx) {
+    readPersonnel: async (ctx) => {
         let user_id = ctx.params.user_id
         try {
             let result = await Personnel.findOne({ where: { user_id: user_id }, raw: true })
@@ -55,7 +55,7 @@ const api = {
     },
 
     // 更新使用者姓名、生日
-    updatePersonnel: async function (ctx) {
+    updatePersonnel: async (ctx) => {
         const data = ctx.request.body
         const birthday = new Date(data.birthday).getTime()
 
@@ -78,8 +78,8 @@ const api = {
             ctx.response.body = error
         }
     },
-
-    updatePairedMac: async function (ctx) {
+    // 更新使用者配對的手環
+    updatePairedMac: async (ctx) => {
         const data = ctx.request.body
         try {
             await Personnel.update(
@@ -133,7 +133,7 @@ const api = {
     },
 
     // 刪除單一使用者，並同步手環列表
-    deletePersonnel: async function (ctx) {
+    deletePersonnel: async (ctx) => {
         let user_id = ctx.params.user_id
 
         try {

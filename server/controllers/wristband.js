@@ -2,7 +2,7 @@ const { Wristband, Personnel } = require('../models/models')
 
 const api = {
     // 新增單一新手環
-    createWristband: async function (ctx) {
+    createWristband: async (ctx) => {
         const data = ctx.request.body
         try {
             const params = {
@@ -17,7 +17,7 @@ const api = {
     },
 
     // 取得手環列表
-    readWristbands: async function (ctx) {
+    readWristbands: async (ctx) => {
         try {
             let result = await Wristband.findAll({ raw: true })
             ctx.response.body = result
@@ -27,7 +27,7 @@ const api = {
     },
 
     // 取得單一手環
-    readWristband: async function (ctx) {
+    readWristband: async (ctx) => {
         let mac = ctx.params.mac
         try {
             let result = await Wristband.findOne({ where: { mac: mac }, raw: true })
@@ -38,7 +38,7 @@ const api = {
     },
 
     // 更新手環型號及欲配對的使用者
-    updateWristband: async function (ctx) {
+    updateWristband: async (ctx) => {
         const data = ctx.request.body
         try {
             await Wristband.update(
@@ -94,7 +94,7 @@ const api = {
     },
 
     // 刪除單一手環，並同步使用者列表
-    deleteWristband: async function (ctx) {
+    deleteWristband: async (ctx) => {
         let mac = ctx.params.mac
         try {
             await Personnel.update({ mac: null }, { where: { mac: mac }, raw: true })

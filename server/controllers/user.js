@@ -2,7 +2,8 @@ const { User, Token } = require('../models/models')
 const { getToken, getTokenRenewStatus, createNewToken } = require('../utils/token')
 
 const api = {
-    login: async function (ctx) {
+    // 使用者登入，並傳遞 JWT。
+    login: async (ctx) => {
         let { username, password } = ctx.request.body
 
         try {
@@ -33,7 +34,8 @@ const api = {
             ctx.response.body = error
         }
     },
-    checkStatus: async function (ctx) {
+    // 檢查使用者 Token 狀態，有效則刷新使用期限。
+    checkStatus: async (ctx) => {
         let { token } = ctx.request.body
         try {
             if (getTokenRenewStatus(token)) {

@@ -1,13 +1,13 @@
 const { Op } = require('sequelize')
 const { Five_minute_hr, One_day_hr, One_month_hr } = require('../models/models')
 
-// 取得單一使用者多種區間心率資料
 const api = {
-    read5MinuteHr: async function (ctx) {
+    // 取得使用者部分或全部的五分鐘平均心率資料
+    read5MinuteHr: async (ctx) => {
         const { user_id, start_time, end_time } = ctx.params
         try {
             let result
-            if (start_time !== undefined && end_time !== undefined) {
+            if (start_time && end_time) {
                 result = await Five_minute_hr.findAll({
                     where: { user_id: user_id, timestamp: { [Op.between]: [start_time, end_time] } },
                     raw: true,
@@ -23,7 +23,8 @@ const api = {
             ctx.response.body = error
         }
     },
-    readLatest1DayHr: async function (ctx) {
+    // 取得使用者前日的平均心率資料
+    readLatest1DayHr: async (ctx) => {
         const { user_id, start_time, end_time } = ctx.params
         try {
             let result = await One_day_hr.findOne({
@@ -36,7 +37,8 @@ const api = {
             ctx.response.body = error
         }
     },
-    readLatest1MonthHr: async function (ctx) {
+    // 取得使用者前月的平均心率資料
+    readLatest1MonthHr: async (ctx) => {
         const { user_id, start_time, end_time } = ctx.params
         try {
             let result = await One_month_hr.findOne({
