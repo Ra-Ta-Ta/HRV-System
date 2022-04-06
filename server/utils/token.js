@@ -4,9 +4,9 @@ const SECRET = require('../config').gateway
 const getTokenRenewStatus = (token) => {
     const { exp } = parseToken(token)
     if (exp - Date.now() / 1000 > 5) {
-        return false
-    } else {
         return true
+    } else {
+        return false
     }
 }
 
