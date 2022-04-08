@@ -3,11 +3,7 @@ const SECRET = require('../config').gateway
 
 const getTokenRenewStatus = (token) => {
     const { exp } = parseToken(token)
-    if (exp - Date.now() / 1000 > 5) {
-        return true
-    } else {
-        return false
-    }
+    return exp - Date.now() / 1000 > 0
 }
 
 const getToken = (payload = {}) => {
@@ -23,7 +19,6 @@ const parseToken = (token) => {
     try {
         return JWT.verify(token, SECRET)
     } catch {
-        console.log('token is expired')
         return {}
     }
 }

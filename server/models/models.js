@@ -533,7 +533,7 @@ Wristband.init(
 )
 
 sequelize.sync()
-User.create({ username: 'admin', password: 'admin123456' })
+User.create({ username: 'admin', password: 'admin123456' }).catch((err) => console.log(err))
 module.exports = {
     Data,
     Current_data,

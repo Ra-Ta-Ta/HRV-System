@@ -1,5 +1,5 @@
-const { User, Token } = require('../models/models')
-const { getToken, getTokenRenewStatus, createNewToken } = require('../utils/token')
+const { User } = require('../models/models')
+const { getToken, getTokenRenewStatus, createNewToken, parseToken } = require('../utils/token')
 
 const api = {
     // 使用者登入，並傳遞 JWT。

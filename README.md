@@ -22,6 +22,14 @@ npm install
 npm install node-gyp -g
 ```
 
+Required configuration
+
+```
+1. Open binding.gyp on root directory.
+2. Select the file that will be generated depends on your operating system.
+3. Invoke the configure & build command: node-gyp configure && node-gyp build.
+```
+
 Start a Local Server
 
 ```

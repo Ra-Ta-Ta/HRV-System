@@ -13,7 +13,6 @@ const Hr = require('../controllers/hr')
 const Exit = require('../controllers/exit')
 
 router
-
     .get('/data/:user_id&:start_time&:end_time', Data.readData)
 
     .get('/hrv/5minute-hrv/:user_id&:start_time&:end_time', Hrv.read5MinuteHrv)

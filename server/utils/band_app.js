@@ -23,7 +23,7 @@ const {
 // 自動排程執行套件
 const cron = require('node-cron')
 
-module.exports = async () => {
+module.exports = (async () => {
     await noble.on('stateChange', (state) => {
         console.log(state)
         if (state === 'poweredOn') {
@@ -155,4 +155,4 @@ module.exports = async () => {
     //         console.log(err)
     //     }
     // })
-}
+})()

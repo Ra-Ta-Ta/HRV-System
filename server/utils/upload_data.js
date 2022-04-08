@@ -318,7 +318,7 @@ let upload_data = async (
     }
 }
 
-module.exports = () => {
+module.exports = (() => {
     // 每分執行
     cron.schedule('* * * * *', async () => {
         await upload_five_minute_data()
@@ -380,4 +380,4 @@ module.exports = () => {
         }
         upload_data(last_month.start_time, last_month.end_time, One_week_hr, One_week_hrv, One_month_hr, One_month_hrv)
     })
-}
+})()
