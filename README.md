@@ -2,7 +2,7 @@
 
 ## Description
 
-Heart rate variability analysis system is used for the calculation of physiological measurements such as stress level, fatigue level and exercise load. Meanwhile, with gateway, the user's location can be tracked at any time.
+The heart rate variability analysis system is used for the calculation of physiological measurements such as stress level, fatigue level and exercise load. Meanwhile, with gateways, the user's location can be tracked at any time.
 
 The system using :
 
