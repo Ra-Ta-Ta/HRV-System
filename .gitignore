@@ -42,3 +42,4 @@ log/log.log
 log/log.out
 
 package-lock.json
+test/

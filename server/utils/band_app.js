@@ -20,7 +20,7 @@ const {
     UPDATE_GATEWAY,
     UPDATE_WRISTBAND,
 } = require('./methods')
-// 自動排程執行套件
+// Automatic scheduling package
 const cron = require('node-cron')
 
 module.exports = (async () => {
@@ -47,9 +47,9 @@ module.exports = (async () => {
 
     async function parse_band_data(band_data) {
         /*
-    因應型號 I10 自帶兩組 manufacturerData，需加入額外判斷以過濾短的那組，故請調整 noble 套件:
-    1. 開啟 node_module => @abandonware => noble => lib => hci-socket => gap.js
-    2. 至 227 行附近更改 advertisement.manufacturerData = bytes =>
+    Due to the I10 model having two sets of manufacturerData, an additional check is needed to filter out the shorter one. Therefore, adjust the noble package:
+    1. Open node_module => @abandonware => noble => lib => hci-socket => gap.js
+    2. Around line 227, change advertisement.manufacturerData = bytes =>
         if(advertisement.localName == 'I10'  ){
           if(bytes.toString('hex').length === 40){
             advertisement.manufacturerData = bytes;
@@ -70,7 +70,7 @@ module.exports = (async () => {
         let temperature = false
         let charge = battery < 10 ? true : false
         let sos = parseInt(raw_data.substring(34, 36), 16) !== 0 ? true : false
-        let rri = hr > 0 ? Math.round(60000 / hr) : 0 // 概略版 RRI 公式: 60000 / hr (單位:ms)
+        let rri = hr > 0 ? Math.round(60000 / hr) : 0 // Approximate RRI formula: 60000 / hr (unit: ms)
 
         if (pair_type === 'SH09HT' || pair_type === 'S9') {
             let tmp = raw_data.substring(28, 32)
@@ -89,7 +89,7 @@ module.exports = (async () => {
             sos = parseInt(raw_data.substring(40, 42), 16) !== 0 ? true : false
         }
 
-        // 取得已註冊 user_id
+        // Get registered user_id
         try {
             let personnelData = await Personnel.findOne({ where: { mac: mac }, raw: true })
             if (personnelData) {
@@ -116,14 +116,14 @@ module.exports = (async () => {
         }
     }
 
-    // garmin stick 嘗試開啟接收器
+    // Attempt to open Garmin stick receiver
     // await stick.openAsync((err) => {
     //     try {
-    //         // 如果偵測到接收器開啟，則開始掃描可接收裝置。
+    //         // If the receiver is detected as open, start scanning for receivable devices.
     //         stick.on('startup', () => {
     //             sensor.scan()
     //         })
-    //         // 如果偵測到裝置回傳資料，而且同時帶有 SerialNumber 和心率值則上傳。
+    //         // If a device returns data with both SerialNumber and heart rate values, upload it.
     //         sensor.on('hbData', async (data) => {
     //             if (data.SerialNumber && data.ComputedHeartRate > 0) {
     //                 let mac = data.SerialNumber.toString()

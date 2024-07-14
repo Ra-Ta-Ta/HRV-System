@@ -1,5 +1,5 @@
 const JWT = require('jsonwebtoken')
-const SECRET = require('../config').gateway
+const SECRET = require('../../config').gateway
 
 const getTokenRenewStatus = (token) => {
     const { exp } = parseToken(token)

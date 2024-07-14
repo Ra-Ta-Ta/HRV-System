@@ -6,7 +6,9 @@ const { Personnel, Gateway, Wristband } = Models
 const methods = {
     CREATE_DATA: (table, data) => {
         try {
-            let result = table.create(data)
+            let result = table.create(data, {
+                ignoreDuplicates: true,
+            })
             return result
         } catch (error) {
             console.log(error)

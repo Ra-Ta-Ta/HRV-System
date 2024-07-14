@@ -4,8 +4,8 @@
   "targets": [
     {
       "target_name": "binding",
-      "sources": [ "./build/binding.vcxproj" ] # For Windows
-      #"sources": [ "./build/binding.Makefile" ] # For Unix platforms 
+      #"sources": [ "./build/binding.vcxproj" ] # For Windows
+      "sources": [ "./build/binding.Makefile" ] # For Unix platforms 
     }
   ]
 } 

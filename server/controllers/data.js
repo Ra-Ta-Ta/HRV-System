@@ -2,7 +2,7 @@ const { Op } = require('sequelize')
 const { Data } = require('../models/models')
 
 const api = {
-    // 取得單一使用者區間資料
+    // Get interval data for a single user.
     readData: async (ctx) => {
         let { user_id, start_time, end_time } = ctx.params
         try {

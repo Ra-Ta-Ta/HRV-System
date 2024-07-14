@@ -1,5 +1,5 @@
 const cron = require('node-cron')
-const config = require('../config')
+const config = require('../../config')
 const Sequelize = require('sequelize')
 const { Op, QueryTypes } = Sequelize
 const sequelize = new Sequelize(config.postgreServerUrl, {
@@ -25,13 +25,13 @@ const {
     One_month_hr,
 } = require('../models/models')
 
-// 引入資料表操作function
+// Import data table operation functions
 const { GET_DATA, CREATE_DATA } = require('./methods')
 
-// 引入心率相關算式
+// Import heart rate related formulas
 const { AGE, MEAN_HR, MAX_HR, MIN_HR, SDNN, RMSSD, HRR, FFT } = require('./formulas')
 
-// 每分鐘從原始數據中，提取並換算 Hr、Hrv 相關數據
+// Extract and compute Hr and Hrv data from raw data every minute
 let upload_five_minute_data = async () => {
     const last_five_min = {
         start_time: new Date().setMinutes(new Date().getMinutes() - 5, 0, 0),
@@ -189,7 +189,7 @@ let upload_five_minute_data = async () => {
     }
 }
 
-// 從限定區間中，取得先前已換算的資料總和的平均做為新區間的值，避免操作原始資料而加重資料庫負擔。
+// Retrieve previously computed data sum from a specified range and average it for a new range to avoid database overload.
 let upload_data = async (
     start_time,
     end_time,
@@ -269,6 +269,8 @@ let upload_data = async (
                 if (all_data.length > 0) {
                     const all_hrr = []
                     const all_rmssd = []
+
+
                     const all_sdnn = []
                     const all_frequency = []
 
@@ -319,12 +321,12 @@ let upload_data = async (
 }
 
 module.exports = (() => {
-    // 每分執行
+    // Execute every minute
     cron.schedule('* * * * *', async () => {
         await upload_five_minute_data()
     })
 
-    // 每小時執行
+    // Execute every hour
     cron.schedule('0 * * * *', () => {
         let last_hour = {
             start_time: new Date().setHours(new Date().getHours() - 1, 0, 0, 0),
@@ -340,7 +342,7 @@ module.exports = (() => {
         )
     })
 
-    // 每天執行
+    // Execute daily
     cron.schedule('0 0 * * *', () => {
         let yesterday = {
             start_time: new Date(new Date().setDate(new Date().getDate() - 1)).setHours(0, 0, 0, 0),
@@ -349,7 +351,7 @@ module.exports = (() => {
         upload_data(yesterday.start_time, yesterday.end_time, One_hour_hr, One_hour_hrv, One_day_hr, One_day_hrv)
     })
 
-    // 每周一執行
+    // Execute weekly on Monday
     cron.schedule('0 0 * * 1', () => {
         let last_week = {
             start_time: new Date(
@@ -367,7 +369,7 @@ module.exports = (() => {
         upload_data(last_week.start_time, last_week.end_time, One_day_hr, One_day_hrv, One_week_hr, One_week_hrv)
     })
 
-    // 每月一號執行
+    // Execute monthly on the 1st
     cron.schedule('0 0 1 * *', () => {
         let last_month = {
             start_time: new Date(new Date(new Date().setMonth(new Date().getMonth() - 1)).setDate(1)).setHours(
