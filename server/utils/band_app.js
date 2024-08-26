@@ -2,7 +2,7 @@ const noble = require('@abandonware/noble')
 // const Ant = require('ant-plus')
 // const stick = new Ant.GarminStick3()
 // const sensor = new Ant.HeartRateScanner(stick)
-const config = require('../config')
+const config = require('../../config')
 const Sequelize = require('sequelize')
 const sequelize = new Sequelize(config.postgreServerUrl, {
     logging: false,
