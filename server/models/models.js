@@ -533,9 +533,25 @@ Wristband.init(
 );
 
 sequelize.sync();
-User.create({ username: 'admin', password: 'admin123456' }).catch((err) =>
-	console.log(err)
-);
+
+User.findOne({ where: { username: 'admin' } })
+	.then((user) => {
+		if (user) {
+			console.log('Username already exists.');
+		} else {
+			User.create({ username: 'admin', password: 'admin123456' })
+				.then(() => {
+					console.log('User created successfully.');
+				})
+				.catch((err) => {
+					console.error('Error creating user:', err);
+				});
+		}
+	})
+	.catch((err) => {
+		console.error('Error checking username:', err);
+	});
+
 module.exports = {
 	Data,
 	Current_data,
