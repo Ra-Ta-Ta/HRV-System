@@ -1,5 +1,5 @@
 // Upload wristband-related data (Comment out this line if the host Bluetooth does not support this feature)
-// const Band = require('./utils/band_app')
+// const Band = require('./server/utils/band_app')
 // Upload heart rate variability analysis data
 const Upload_data = require('./server/utils/upload_data');
 // Koa-related packages
